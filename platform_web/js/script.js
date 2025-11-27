@@ -1,5 +1,5 @@
 /*
-   Main Logic Script
+   Main Logic Script - Modified to accept partial inputs
    Handles:
    1. Input mapping (Arabic <-> English) based on Saudi plate standards
    2. Input filtering (only allowed Saudi characters/digits)
@@ -11,7 +11,7 @@ const numMapAr = { '0':'٠', '1':'١', '2':'٢', '3':'٣', '4':'٤', '5':'٥', '
 const numMapEn = { '٠':'0', '١':'1', '٢':'2', '٣':'3', '٤':'4', '٥':'5', '٦':'6', '٧':'7', '٨':'8', '٩':'9' };
 
 // Allowed Arabic Chars (17 chars: أ ب ج د ر س ص ط ع ق ك ل م ن هـ و ى)
-const validArabicChars = 'أبجد رسمصط عقكلمنهـوى';
+const validArabicChars = 'أابجد رسمصط عقكلمنهـوى';
 // Corresponding English Chars (A B J D R S C T E G K L M N H U I)
 const validEnglishChars = 'ABJDRSCTEGKLMNHUI';
 
@@ -32,69 +32,8 @@ const inputCharAr = document.getElementById('inputCharAr');
 const inputCharEn = document.getElementById('inputCharEn');
 const validationMessage = document.getElementById('validationMessage');
 
-// Helper function to process and clean input based on allowed characters and max length
-function processInput(inputValue, charMap, allowedChars, maxLength, targetInput) {
-    let filteredVal = '';
-    let mappedVal = '';
-    let charCount = 0;
-
-    // Remove any previous spaces before processing to get true length
-    const cleanVal = inputValue.replace(/\s+/g, '').toUpperCase();
-
-    for (let char of cleanVal) {
-        if (charCount >= maxLength) break;
-
-        let charToCheck = char;
-        let mappedChar = '';
-        let isArabic = charMap === charMapArToEn;
-
-        // Determine the character to check against the allowed list
-        if (isArabic) {
-             // Handle the two-char "هـ" if present (though direct input is unlikely)
-            if (char === 'ه' && cleanVal.includes('هـ')) charToCheck = 'هـ';
-        }
-
-        // Check if character is valid (Arabic or English side)
-        let isValid = isArabic 
-            ? validArabicChars.includes(charToCheck.replace(' ', '')) 
-            : validEnglishChars.includes(charToCheck);
-        
-        if (isValid) {
-            filteredVal += char;
-            charCount++;
-        }
-    }
-    
-    // Perform mapping after filtering
-    for (let char of filteredVal) {
-        let key = isArabic ? char : char.toUpperCase();
-        let value = isArabic ? charMap[key] : charMap[key];
-
-        // Mapped value logic
-        if (value) {
-            mappedVal += value + ' ';
-        } else if (!isArabic && charMapArToEn[key]) {
-             // If English input, sometimes we need the Arabic letter itself
-             mappedVal += charMapArToEn[key] + ' '; 
-        } else {
-            // Numbers case, just map
-            if (numMapAr[char]) mappedVal += numMapAr[char] + ' ';
-            else if (numMapEn[char]) mappedVal += numMapEn[char] + ' ';
-        }
-    }
-
-    // Set value on the target input and re-format the source input
-    if (targetInput) {
-        targetInput.value = filteredVal.split('').join(' ').trim(); // Format source input with spaces
-    }
-    
-    return mappedVal.trim();
-}
-
-
 // --- Event Listeners: NUMBERS ---
-// Note: Numbers are universal (0-9) and handled separately
-// The mapping logic remains similar but separated for clarity.
+// Modified to accept any number of digits (not limited to 4)
 
 // 1. Writing in Arabic Numbers
 if(inputNumAr) {
@@ -102,18 +41,14 @@ if(inputNumAr) {
         let val = e.target.value.replace(/\s/g, '');
         let enVal = '';
         let filteredArVal = '';
-        let charCount = 0;
         
         for (let char of val) {
-            if (charCount >= 4) break;
             if (numMapEn[char]) { // Arabic digit
                 enVal += numMapEn[char];
                 filteredArVal += char;
-                charCount++;
-            } else if (numMapAr[char]) { // English digit (shouldn't happen often but handles copy-paste)
+            } else if (char >= '0' && char <= '9') { // English digit (handles copy-paste)
                 enVal += char;
                 filteredArVal += numMapAr[char];
-                charCount++;
             }
         }
         inputNumAr.value = filteredArVal.split('').join(' ').trim();
@@ -127,18 +62,14 @@ if(inputNumEn) {
         let val = e.target.value.replace(/\s/g, '');
         let arVal = '';
         let filteredEnVal = '';
-        let charCount = 0;
 
         for (let char of val) {
-            if (charCount >= 4) break;
-            if (numMapAr[char]) { // English digit
+            if (char >= '0' && char <= '9') { // English digit
                 arVal += numMapAr[char];
                 filteredEnVal += char;
-                charCount++;
             } else if (numMapEn[char]) { // Arabic digit
                  arVal += char;
                  filteredEnVal += numMapEn[char];
-                 charCount++;
             }
         }
         inputNumEn.value = filteredEnVal.split('').join(' ').trim();
@@ -147,6 +78,7 @@ if(inputNumEn) {
 }
 
 // --- Event Listeners: LETTERS ---
+// Modified to accept any number of characters (not limited to 3)
 
 // 1. Writing in Arabic Letters (Filtering and Mapping to English)
 if(inputCharAr) {
@@ -154,21 +86,20 @@ if(inputCharAr) {
         let val = e.target.value;
         let filteredAr = '';
         let enVal = '';
-        let charCount = 0;
         
         const cleanVal = val.replace(/\s/g, '');
 
         for (let char of cleanVal) {
-            if (charCount >= 3) break;
-            
-            // Handle the two-char "هـ" as a single character if possible
-            if (char === 'ه' && cleanVal.includes('هـ') && charCount < 3) {
-                 // Simple logic to prevent partial 'هـ' from being processed
-                if(cleanVal.indexOf('ه') + 1 < cleanVal.length && cleanVal[cleanVal.indexOf('ه') + 1] === 'ـ') {
+            // Handle the two-char "هـ" as a single character
+            if (char === 'ه' && cleanVal.includes('هـ')) {
+                // Simple logic to prevent partial 'هـ' from being processed
+                const index = cleanVal.indexOf('ه');
+                if(index + 1 < cleanVal.length && cleanVal[index + 1] === 'ـ') {
                     if (validArabicChars.includes('هـ')) {
                         filteredAr += 'هـ';
                         enVal += charMapArToEn['هـ'];
-                        charCount++;
+                        // Skip the next character since we processed 'هـ'
+                        continue;
                     }
                 }
             }
@@ -176,7 +107,6 @@ if(inputCharAr) {
             if (validArabicChars.includes(char)) {
                 filteredAr += char;
                 enVal += charMapArToEn[char];
-                charCount++;
             }
         }
         
@@ -191,16 +121,13 @@ if(inputCharEn) {
         let val = e.target.value.toUpperCase();
         let filteredEn = '';
         let arVal = '';
-        let charCount = 0;
         
         const cleanVal = val.replace(/\s/g, '');
         
         for (let char of cleanVal) {
-            if (charCount >= 3) break;
             if (validEnglishChars.includes(char)) {
                 filteredEn += char;
                 arVal += charMapEnToAr[char];
-                charCount++;
             }
         }
 
@@ -210,28 +137,27 @@ if(inputCharEn) {
 }
 
 // --- Search Functions ---
+// Modified to accept partial inputs for search
 
 function performSearch() {
     const btn = document.querySelector('button[onclick="performSearch()"]');
     const searchSection = document.getElementById('searchSection');
     const resultsSection = document.getElementById('resultsSection');
     
-    // Check for full plate completion (4 digits, 3 characters)
+    // Get current values (accept any length)
     const numValue = inputNumEn.value.replace(/\s/g, '');
     const charValue = inputCharEn.value.replace(/\s/g, '');
     
-    if (numValue.length !== 4 || charValue.length !== 3) {
+    // Optional: Show warning if inputs are empty instead of error
+    if (numValue.length === 0 && charValue.length === 0) {
         if (validationMessage) {
+            validationMessage.textContent = 'الرجاء إدخال رقم اللوحة أو الأحرف';
             validationMessage.classList.remove('hidden');
-            inputNumAr.classList.add('border-red-500', 'border-2');
-            inputCharAr.classList.add('border-red-500', 'border-2');
             setTimeout(() => {
                 validationMessage.classList.add('hidden');
-                inputNumAr.classList.remove('border-red-500', 'border-2');
-                inputCharAr.classList.remove('border-red-500', 'border-2');
             }, 3000);
         }
-        return; // Stop search if validation fails
+        return;
     }
 
     if (!btn || !searchSection || !resultsSection) return;
@@ -239,10 +165,19 @@ function performSearch() {
     // Hide validation message if it was shown
     if (validationMessage) validationMessage.classList.add('hidden');
 
-    // Update result text
-    const plateText = (inputNumEn.value + " " + inputCharEn.value).trim() || "1234 ABD";
+    // Update result text - show partial inputs
+    const plateText = (inputNumEn.value + " " + inputCharEn.value).trim() || "بحث جزئي";
     const displayEl = document.getElementById('resultPlateDisplay');
     if(displayEl) displayEl.innerText = plateText;
+
+    // Show search criteria in results
+    const searchCriteriaEl = document.getElementById('searchCriteria');
+    if(searchCriteriaEl) {
+        let criteria = [];
+        if(numValue.length > 0) criteria.push(`الأرقام: ${numValue}`);
+        if(charValue.length > 0) criteria.push(`الأحرف: ${charValue}`);
+        searchCriteriaEl.textContent = `معايير البحث: ${criteria.join(' - ')}`;
+    }
 
     // Loading State
     const original = btn.innerHTML;
@@ -284,4 +219,12 @@ function resetSearch() {
         if(inputCharAr) inputCharAr.value = '';
         if(inputCharEn) inputCharEn.value = '';
     }, 300);
+}
+
+// Optional: Add function to show current input status
+function updateInputStatus() {
+    const numValue = inputNumEn.value.replace(/\s/g, '');
+    const charValue = inputCharEn.value.replace(/\s/g, '');
+    
+    console.log(`Current input - Numbers: ${numValue} (${numValue.length} digits), Chars: ${charValue} (${charValue.length} chars)`);
 }
