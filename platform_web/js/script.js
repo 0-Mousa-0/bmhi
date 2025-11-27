@@ -17,7 +17,7 @@ const validEnglishChars = 'ABJDRSCTEGKLMNHUI';
 
 // The definitive mapping based on user requirements
 const charMapArToEn = {
-    'أ':'A', 'ب':'B', 'ج':'J', 'د':'D', 'ر':'R', 'س':'S', 'ص':'C', 'ط':'T', 'ع':'E', 'ق':'G', 'ك':'K', 'ل':'L', 'م':'M', 'ن':'N', 'هـ':'H', 'و':'U', 'ى':'I'
+    'أ':'A', 'ب':'B', 'ج':'J', 'د':'D', 'ر':'R', 'س':'S', 'ص':'C', 'ط':'T', 'ع':'E', 'ق':'G', 'ك':'K', 'ل':'L', 'م':'M', 'ن':'N', 'ه':'H', 'و':'U', 'ى':'I'
 };
 // Reverse Mapping
 const charMapEnToAr = {};
@@ -78,7 +78,6 @@ if(inputNumEn) {
 }
 
 // --- Event Listeners: LETTERS ---
-// Modified to accept any number of characters (not limited to 3)
 
 // 1. Writing in Arabic Letters (Filtering and Mapping to English)
 if(inputCharAr) {
@@ -90,18 +89,9 @@ if(inputCharAr) {
         const cleanVal = val.replace(/\s/g, '');
 
         for (let char of cleanVal) {
-            // Handle the two-char "هـ" as a single character
-            if (char === 'ه' && cleanVal.includes('هـ')) {
-                // Simple logic to prevent partial 'هـ' from being processed
-                const index = cleanVal.indexOf('ه');
-                if(index + 1 < cleanVal.length && cleanVal[index + 1] === 'ـ') {
-                    if (validArabicChars.includes('هـ')) {
-                        filteredAr += 'هـ';
-                        enVal += charMapArToEn['هـ'];
-                        // Skip the next character since we processed 'هـ'
-                        continue;
-                    }
-                }
+            // تحويل "ا" إلى "أ" تلقائياً
+            if (char === 'ا') {
+                char = 'أ'; // Convert Alif to Hamza
             }
             
             if (validArabicChars.includes(char)) {
@@ -127,6 +117,7 @@ if(inputCharEn) {
         for (let char of cleanVal) {
             if (validEnglishChars.includes(char)) {
                 filteredEn += char;
+                // الحفاظ على "أ" للقيمة A
                 arVal += charMapEnToAr[char];
             }
         }
