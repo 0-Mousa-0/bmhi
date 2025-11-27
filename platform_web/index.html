@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -20,76 +19,32 @@
     <script src="js/tailwind.config.js"></script>
 
     <style>
-        /* تنسيقات الخريطة المدمجة */
-        :root {
-            --primary-color: #014B32; /* تم تحديث اللون ليتماشى مع الهوية */
-        }
-
-        #map { 
-            height: 100%; 
-            width: 100%; 
-            z-index: 1; 
-            border-radius: 1rem;
-        }
-
-        /* تصميم الدبوس الثابت */
+        #map { height: 100%; width: 100%; z-index: 1; border-radius: 1rem; }
+        
+        /* تصميم الدبوس */
         .pin-inner {
-            background-color: var(--primary-color);
-            border: 3px solid white;
-            border-radius: 50%;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
-            transition: transform 0.2s;
+            background-color: #014B32; border: 3px solid white; border-radius: 50%;
+            width: 100%; height: 100%; box-sizing: border-box;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.4); transition: transform 0.2s;
         }
+        .pin-inner:hover { transform: scale(1.2); background-color: #016C48; cursor: pointer; }
 
-        .pin-inner:hover {
-            transform: scale(1.2);
-            background-color: #016C48;
-            cursor: pointer;
-        }
-
-        /* لوحة التحكم فوق الخريطة */
+        /* لوحة التحكم بالخريطة */
         .control-panel {
-            position: absolute;
-            top: 20px; 
-            right: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            z-index: 1000; /* أعلى من الخريطة */
-            width: 250px;
-            border-right: 4px solid var(--primary-color);
+            position: absolute; top: 20px; right: 20px;
+            background: white; padding: 15px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1000; width: 250px;
+            border-right: 4px solid #014B32;
         }
-
-        .status-box {
-            background: #f3f4f6; 
-            padding: 10px; 
-            border-radius: 5px;
-            margin-top: 10px; 
-            font-size: 13px;
-        }
-
+        .status-box { background: #f3f4f6; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 13px; }
         .btn-reset {
-            width: 100%; 
-            padding: 8px; 
-            background: #374151; 
-            color: white;
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            margin-top: 10px;
-            display: none;
-            font-size: 0.9rem;
+            width: 100%; padding: 8px; background: #374151; color: white;
+            border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;
+            display: none; font-size: 0.9rem;
         }
+        .btn-reset:hover { background: #1f2937; }
         
-        .btn-reset:hover {
-            background: #1f2937;
-        }
-        
-        /* إخفاء لوحة التوجيهات الافتراضية المزعجة */
+        /* إخفاء نافذة التوجيهات الافتراضية */
         .leaflet-routing-container { display: none !important; }
     </style>
 </head>
@@ -97,12 +52,13 @@
 
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50 h-20 shadow-sm">
         <div class="container mx-auto px-4 h-full flex items-center justify-between">
+            
             <div class="flex items-center gap-8 h-full">
                 <div class="flex items-center gap-3 border-l pl-6 border-gray-200 h-12 cursor-pointer" onclick="location.reload()">
                     <div class="flex flex-col items-end">
                         <h1 class="text-lg font-bold text-gray-800 leading-none">بوابة تتبع المركبات</h1>
                     </div>
-                    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10 50 C30 20 70 20 90 50 C70 80 30 80 10 50 Z" fill="white" stroke="#014B32" stroke-width="3"/>
                         <circle cx="50" cy="50" r="15" fill="#014B32"/>
                         <circle cx="58" cy="42" r="5" fill="white" opacity="0.7"/>
@@ -111,6 +67,8 @@
             </div>
 
             <div class="flex items-center gap-4">
+                <div class="relative">
+                </div>
                 <button class="flex items-center gap-2 text-gray-700 font-bold text-sm hover:text-ksaGreen px-2">
                     <span>English</span>
                     <i class="fa-solid fa-globe text-lg"></i>
@@ -122,11 +80,12 @@
     <main class="flex-grow container mx-auto px-4 py-12 relative">
         
         <section id="searchSection" class="max-w-5xl mx-auto transition-all duration-700">
+            
             <div class="text-center mb-12 fade-in-up">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">الاستعلام عن المركبات</h2>
                 <p class="text-gray-500">أدخل رقم اللوحة أدناه</p>
                 <div id="validationMessage" class="mt-4 text-red-600 font-bold hidden">
-                    الرجاء إدخال 4 أرقام و 3 أحرف مسموح بها بالكامل.
+                    الرجاء إدخال رقم اللوحة أو الأحرف
                 </div>
             </div>
 
@@ -136,12 +95,15 @@
                         <div class="flex justify-between mb-3 px-2">
                             <span class="text-sm font-bold text-gray-400">أكتب بيانات اللوحة</span>
                         </div>
+
                         <div class="flex flex-row-reverse border-[4px] border-black rounded-xl overflow-hidden h-36 bg-white shadow-lg transform hover:scale-[1.01] transition duration-300">
                             <div class="w-32 border-r-[4px] border-black flex flex-col items-center justify-between py-4 bg-white">
                                 <span class="text-sm font-extrabold text-black tracking-widest">السعودية</span>
-                                <div class="w-14 h-14 text-ksaGreen flex items-center justify-center"></div>
+                                <div class="w-14 h-14 text-ksaGreen flex items-center justify-center">
+                                    </div>
                                 <span class="text-sm font-extrabold text-black transform rotate-90 whitespace-nowrap tracking-[4px] mb-1">KSA</span>
                             </div>
+
                             <div class="flex-1 border-r-[4px] border-black flex flex-col">
                                 <div class="h-1/2 border-b-[2px] border-black/10 flex items-center justify-center bg-gray-50/50 relative">
                                     <input type="text" id="inputNumAr" class="plate-input plate-text-ar text-gray-800 text-lg" placeholder="١ ٢ ٣ ٤" maxlength="6">
@@ -150,6 +112,7 @@
                                     <input type="text" id="inputNumEn" class="plate-input plate-text-en text-gray-800 text-lg uppercase" placeholder="1 2 3 4" maxlength="6">
                                 </div>
                             </div>
+
                             <div class="flex-1 flex flex-col">
                                 <div class="h-1/2 border-b-[2px] border-black/10 flex items-center justify-center bg-gray-50/50 relative">
                                     <input type="text" id="inputCharAr" class="plate-input plate-text-ar text-gray-800 text-lg" placeholder="أ ب د" maxlength="4">
@@ -167,6 +130,7 @@
                             <span>بحث</span>
                         </button>
                     </div>
+
                 </div>
             </div>
         </section>
@@ -189,14 +153,12 @@
 
             <div class="grid lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 h-[500px] relative">
-                    
                     <div class="control-panel">
                         <h3 class="font-bold text-gray-800 mb-1">نظام المراقبة الحية</h3>
                         <div style="font-size:12px; color:#666; margin-bottom:5px;">كاميرات نشطة: <b id="camCount">0</b></div>
                         <div id="statusBox" class="status-box">حدد نقطة البداية للمركبة...</div>
                         <button id="resetBtn" class="btn-reset" onclick="resetMap()">مسح المسار</button>
                     </div>
-
                     <div id="map"></div>
                 </div>
 
@@ -238,25 +200,30 @@
 
     <footer class="bg-ksaGreen text-white mt-auto pt-12 pb-6 border-t-4 border-[#003826]">
         <div class="container mx-auto px-6">
+            
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-right mb-12">
+                
                 <div>
                     <h4 class="font-bold text-lg mb-5 text-white border-b border-white/20 pb-2 inline-block">ملخص</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="footer-link">حول منصة تتبع المركبات</a></li>
+                        <li><a href="#" class="footer-link">حول منصه تتبع المركبات</a></li>
                     </ul>
                 </div>
+
                 <div>
                     <h4 class="font-bold text-lg mb-5 text-white border-b border-white/20 pb-2 inline-block">روابط مهمة</h4>
                     <ul class="space-y-2">
                         <li><a href="#" class="footer-link">بوابة تتبع المركبات</a></li>
                     </ul>
                 </div>
+
                 <div>
                     <h4 class="font-bold text-lg mb-5 text-white border-b border-white/20 pb-2 inline-block">الاتصال والدعم</h4>
                     <ul class="space-y-2">
                         <li><a href="#" class="footer-link">تواصل معنا</a></li>
                     </ul>
                 </div>
+
                 <div>
                     <div class="mb-8">
                         <h4 class="font-bold text-lg mb-4 text-white">تابعنا على</h4>
@@ -267,151 +234,25 @@
                     </div>
                 </div>
             </div>
+
             <div class="border-t border-white/20 pt-6">
                 <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+                    
                     <div class="flex gap-4 text-sm text-white/80">
                         <a href="#" class="hover:text-white hover:underline">رابط</a>
                     </div>
+
                     <div class="text-center lg:text-right text-sm text-white/80 space-y-1">
                         <p>هذي المنصه نفذت لهاكثون ابشر © 2025</p>
                     </div>
+
                 </div>
             </div>
         </div>
     </footer>
 
-    <script src="js/script.js"></script>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-
-    <script>
-        // --- تهيئة الخريطة ---
-        var map = L.map('map', {zoomControl: false}).setView([24.7136, 46.6753], 11);
-        
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OSM', maxZoom: 19
-        }).addTo(map);
-
-        // --- البيانات (الكاميرات) ---
-        const cameras = [
-            { name: "حي الملقا", coords: [24.8105, 46.6112] },
-            { name: "حي الصحافة", coords: [24.7963, 46.6385] },
-            { name: "حي النخيل", coords: [24.7681, 46.6318] },
-            { name: "حي الياسمين", coords: [24.8192, 46.6568] },
-            { name: "حي النرجس", coords: [24.8345, 46.6872] },
-            { name: "حي حطين", coords: [24.7648, 46.6045] },
-            { name: "حي العقيق", coords: [24.7785, 46.6231] },
-            { name: "حي الربيع", coords: [24.7912, 46.6734] },
-            { name: "حي العليا", coords: [24.6953, 46.6805] },
-            { name: "حي السليمانية", coords: [24.7011, 46.6978] },
-            { name: "حي الملك عبدالعزيز", coords: [24.7214, 46.7089] },
-            { name: "حي المربع", coords: [24.6465, 46.7093] },
-            { name: "حي الملز", coords: [24.6632, 46.7382] },
-            { name: "حي الوزارات", coords: [24.6558, 46.7165] },
-            { name: "حي الروضة", coords: [24.7251, 46.7654] },
-            { name: "حي القدس", coords: [24.7432, 46.7541] },
-            { name: "حي الحمراء", coords: [24.7689, 46.7582] },
-            { name: "حي قرطبة", coords: [24.8021, 46.7456] },
-            { name: "حي النسيم الغربي", coords: [24.7218, 46.8055] },
-            { name: "حي إشبيلية", coords: [24.7854, 46.7821] },
-            { name: "حي الخليج", coords: [24.7698, 46.8123] },
-            { name: "حي السويدي", coords: [24.5985, 46.6578] },
-            { name: "حي ظهرة لبن", coords: [24.6154, 46.5789] },
-            { name: "حي العريجاء", coords: [24.6234, 46.6112] },
-            { name: "حي طويق", coords: [24.5842, 46.5321] },
-            { name: "حي العزيزية", coords: [24.5823, 46.7651] },
-            { name: "حي الشفا", coords: [24.5385, 46.7082] },
-            { name: "حي منفوحة", coords: [24.6089, 46.7235] },
-            { name: "حي الدار البيضاء", coords: [24.5321, 46.7845] },
-            { name: "حي الحاير", coords: [24.4567, 46.8123] }
-        ];
-        
-        document.getElementById('camCount').innerText = cameras.length;
-
-        // --- إضافة الدبابيس ---
-        cameras.forEach(cam => {
-            const fixedIcon = L.divIcon({
-                className: '',
-                html: `<div class="pin-inner"></div>`, 
-                iconSize: [20, 20],
-                iconAnchor: [10, 10],
-                tooltipAnchor: [0, -12]
-            });
-
-            const marker = L.marker(cam.coords, { icon: fixedIcon }).addTo(map);
-            marker.bindTooltip(cam.name, { direction: 'top' });
-            marker.on('click', () => handleCameraClick(cam.coords, cam.name));
-        });
-
-        // --- منطق المسار ---
-        let start = null;
-        let end = null;
-        let control = null;
-        const statusBox = document.getElementById('statusBox');
-
-        function handleCameraClick(coords, name) {
-            const latlng = L.latLng(coords);
-            
-            if (!start) {
-                start = latlng;
-                statusBox.innerHTML = `البداية: <b>${name}</b><br>اختر الوجهة...`;
-                statusBox.style.color = "#014B32"; // لون الهوية
-            } else if (!end) {
-                if (latlng.equals(start)) return;
-                end = latlng;
-                statusBox.innerHTML = `المسار إلى: <b>${name}</b>`;
-                statusBox.style.color = "black";
-                drawRoute(start, end);
-                document.getElementById('resetBtn').style.display = 'block';
-            }
-        }
-
-        function drawRoute(s, e) {
-            if (control) map.removeControl(control);
-            
-            control = L.Routing.control({
-                waypoints: [s, e],
-                routeWhileDragging: false,
-                addWaypoints: false,
-                draggableWaypoints: false,
-                fitSelectedRoutes: true,
-                show: false,
-                lineOptions: {
-                    styles: [{color: '#014B32', opacity: 0.8, weight: 6}] // تعديل اللون للهوية
-                },
-                createMarker: function() { return null; }
-            }).addTo(map);
-        }
-
-        function resetMap() {
-            start = null; end = null;
-            if (control) map.removeControl(control);
-            statusBox.innerHTML = "حدد نقطة البداية للمركبة...";
-            statusBox.style.color = "#333";
-            document.getElementById('resetBtn').style.display = 'none';
-            map.setView([24.7136, 46.6753], 11);
-        }
-
-        // --- إصلاح مشكلة ظهور الخريطة داخل التبويب المخفي ---
-        // بما أن قسم النتائج مخفي في البداية، يجب تحديث حجم الخريطة عند ظهوره
-        const resultsSection = document.getElementById('resultsSection');
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.attributeName === "class") {
-                    if (!resultsSection.classList.contains('hidden-section') && !resultsSection.classList.contains('opacity-0')) {
-                        // نعطي وقتاً قصيراً للأنيميشن ثم نحدث الخريطة
-                        setTimeout(() => {
-                            map.invalidateSize();
-                        }, 100);
-                    }
-                }
-            });
-        });
-
-        observer.observe(resultsSection, {
-            attributes: true
-        });
-    </script>
+    <script src="js/script.js"></script>
 </body>
 </html>
