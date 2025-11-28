@@ -29,7 +29,6 @@ function setupPlateInputs() {
     const inputCharAr = document.getElementById('inputCharAr');
     const inputCharEn = document.getElementById('inputCharEn');
 
-    // FIX: استخدام bidi-override لإجبار الأرقام العربية على الترتيب من اليسار لليمين
     if(inputNumAr) {
         inputNumAr.style.setProperty('direction', 'ltr', 'important');
         inputNumAr.style.setProperty('unicode-bidi', 'bidi-override', 'important');
@@ -65,8 +64,6 @@ function setupPlateInputs() {
         });
     }
 
-    // --- التعديل هنا لعكس ترتيب الأحرف ---
-
     if(inputCharAr) {
         inputCharAr.addEventListener('input', (e) => {
             let val = e.target.value.replace(/\s/g, '');
@@ -75,8 +72,6 @@ function setupPlateInputs() {
                 if (char === 'ا') char = 'أ';
                 if (validArabicChars.includes(char)) { 
                     filteredAr += char; 
-                    // التغيير هنا: نضع الحرف الجديد في البداية لعكس الترتيب
-                    // بدلاً من enVal += ...
                     enVal = charMapArToEn[char] + enVal; 
                 }
             }
@@ -92,7 +87,6 @@ function setupPlateInputs() {
             for (let char of val) {
                 if (validEnglishChars.includes(char)) { 
                     filteredEn += char; 
-                    // التغيير هنا أيضاً: نضع الحرف العربي المترجم في البداية
                     arVal = charMapEnToAr[char] + arVal; 
                 }
             }
@@ -268,7 +262,44 @@ window.performSearch = function() {
         
         if(map) {
             map.invalidateSize();
-            setTimeout(() => map.invalidateSize(), 300);
+            setTimeout(() => {
+                map.invalidateSize();
+
+                // --------------------------------------------------------
+                // إضافة السيناريو الخاص: رسم المسار تلقائياً بناءً على النتائج
+                // الترتيب: الصحافة (10:15) -> الملقا (10:35) -> الربيع (11:35)
+                // --------------------------------------------------------
+                
+                // إحداثيات الأحياء كما هي معرفة في مصفوفة الكاميرات
+                const hafaCoords = [24.7963, 46.6385]; // الصحافة
+                const malqaCoords = [24.8105, 46.6112]; // الملقا
+                const rabieCoords = [24.7912, 46.6734]; // الربيع
+
+                const simulatedRoute = [
+                    L.latLng(hafaCoords), // نقطة 1
+                    L.latLng(malqaCoords),// نقطة 2
+                    L.latLng(rabieCoords) // نقطة 3
+                ];
+
+                // تحديث المتغيرات لعرض زر المسح وتحديث النص
+                selectedWaypoints = simulatedRoute;
+                
+                const statusBox = document.getElementById('statusBox');
+                const resetBtn = document.getElementById('resetBtn');
+
+                if(statusBox) {
+                    statusBox.innerHTML = `تم رصد مسار المركبة<br>عدد النقاط: 3`;
+                    statusBox.style.color = "#014B32";
+                }
+                if(resetBtn) {
+                    resetBtn.style.display = 'block';
+                }
+
+                // رسم المسار
+                drawRoute(simulatedRoute);
+                // --------------------------------------------------------
+
+            }, 300);
         }
     }, 800);
 };
@@ -294,7 +325,7 @@ window.resetSearch = function() {
 };
 
 // ==========================================
-// PART 3: Image Modal Logic (جديد)
+// PART 3: Image Modal Logic
 // ==========================================
 
 window.showImage = function() {
@@ -302,7 +333,6 @@ window.showImage = function() {
     if(!modal) return;
     
     modal.classList.remove('hidden');
-    // تأخير بسيط لتفعيل الأنيميشن
     requestAnimationFrame(() => {
         modal.classList.remove('opacity-0');
         if(modal.firstElementChild) {
