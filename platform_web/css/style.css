@@ -1,24 +1,29 @@
 /* Main Stylesheet 
-   Contains custom styles for Plate, Animations, and Footer
+   ملف التنسيقات الرئيسي
+   يحتوي على تنسيقات مخصصة للوحة المركبة، الحركات (Animations)، وتذييل الصفحة
 */
 
-/* Plate Typography & Inputs */
+/* Plate Typography & Inputs 
+   تنسيقات الخطوط وحقول الإدخال الخاصة بلوحة السيارة
+*/
 .plate-input {
     width: 100%;
     height: 100%;
     background: transparent;
     border: none;
-    text-align: center;
-    outline: none;
+    text-align: center; /* توسيط النص */
+    outline: none; /* إزالة الحدود عند الكتابة */
     padding: 0;
     margin: 0;
 }
 
+/* تنسيق النص التوضيحي (Placeholder) */
 .plate-input::placeholder {
-    color: #e5e7eb; /* light gray */
+    color: #e5e7eb; /* رمادي فاتح */
     opacity: 0.5;
 }
 
+/* تنسيق النص العربي داخل اللوحة */
 .plate-text-ar {
     font-family: 'IBM Plex Sans Arabic', sans-serif;
     font-weight: 700;
@@ -26,15 +31,18 @@
     line-height: 1;
 }
 
+/* تنسيق النص الإنجليزي داخل اللوحة */
 .plate-text-en {
     font-family: 'Segoe UI', sans-serif;
     font-weight: 800;
     font-size: 1.8rem;
     line-height: 1;
-    letter-spacing: 2px;
+    letter-spacing: 2px; /* تباعد بين الحروف */
 }
 
-/* Animations */
+/* Animations 
+   حركات الظهور (Fade In)
+*/
 .fade-in-up { 
     animation: fadeInUp 0.8s ease-out forwards; 
     opacity: 0; 
@@ -45,11 +53,14 @@
     to { opacity: 1; transform: translateY(0); } 
 }
 
+/* كلاس لإخفاء الأقسام */
 .hidden-section { 
     display: none; 
 }
 
-/* Active Tab Style - Fix Hover Issue */
+/* Active Tab Style
+   تنسيق الزر النشط في القائمة الجانبية
+*/
 .nav-item.active {
     background-color: #014B32 !important;
     color: white !important;

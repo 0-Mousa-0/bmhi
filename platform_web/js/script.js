@@ -1,38 +1,52 @@
 /*
    Main Logic Script
-   Handles:
-   1. Plate Input & Validation (Original Logic)
-   2. Map System & Routing (Leaflet Logic)
-   3. Image Modal Logic
-   4. Navigation & Reports Logic (NEW)
+   السكريبت الرئيسي للمشروع
+   
+   يقوم بمعالجة:
+   1. إدخالات اللوحة والتحقق منها (ربط العربي بالإنجليزي).
+   2. نظام الخرائط والتوجيه (باستخدام مكتبة Leaflet).
+   3. نافذة عرض الصور (Modal).
+   4. التنقل بين الصفحات وعرض البلاغات.
 */
 
-// ... (احتفظ بجميع الأكواد السابقة كما هي حتى تصل إلى PART 3) ...
-// ... من هنا يبدأ الكود السابق ...
+// ==========================================
+// تعريف ثوابت التحويل بين العربي والإنجليزي
+// ==========================================
 
+// تحويل الأرقام
 const numMapAr = { '0':'٠', '1':'١', '2':'٢', '3':'٣', '4':'٤', '5':'٥', '6':'٦', '7':'٧', '8':'٨', '9':'٩' };
 const numMapEn = { '٠':'0', '١':'1', '٢':'2', '٣':'3', '٤':'4', '٥':'5', '٦':'6', '٧':'7', '٨':'8', '٩':'9' };
+
+// الحروف المسموح بها في اللوحات السعودية
 const validArabicChars = 'أابحد رسمصط عقكلمنهـوى';
 const validEnglishChars = 'ABJDRSXTEGKLZNHUV';
+
+// خريطة تحويل الحروف من عربي إلى إنجليزي
 const charMapArToEn = { 'أ':'A', 'ب':'B', 'ح':'J', 'د':'D', 'ر':'R', 'س':'S', 'ص':'X', 'ط':'T', 'ع':'E', 'ق':'G', 'ك':'K', 'ل':'L', 'م':'Z', 'ن':'N', 'ه':'H', 'و':'U', 'ى':'V' };
+
+// إنشاء خريطة عكسية (من إنجليزي إلى عربي) تلقائياً
 const charMapEnToAr = {};
 for (let key in charMapArToEn) charMapEnToAr[charMapArToEn[key]] = key;
 
+// عند اكتمال تحميل الصفحة، قم بتشغيل الدوال الأساسية
 document.addEventListener('DOMContentLoaded', () => {
-    setupPlateInputs();
-    initMap();
-    renderReports(); // تشغيل بيانات البلاغات
+    setupPlateInputs(); // تجهيز حقول الإدخال
+    initMap();          // تشغيل الخريطة
+    renderReports();    // عرض قائمة البلاغات
 });
 
-// ... (الدوال setupPlateInputs, initMap, handleCameraClick, drawRoute, resetMap, performSearch كما هي تماماً في ردك السابق مع تعديلات المسار) ...
+// ==========================================
+// PART 1: Plate Input Logic
+// منطق حقول إدخال اللوحة
+// ==========================================
 
 function setupPlateInputs() {
-    // ... (الكود السابق) ...
     const inputNumAr = document.getElementById('inputNumAr');
     const inputNumEn = document.getElementById('inputNumEn');
     const inputCharAr = document.getElementById('inputCharAr');
     const inputCharEn = document.getElementById('inputCharEn');
 
+    // إجبار اتجاه النص ليكون من اليسار لليمين حتى في الحقول العربية لضبط المحاذاة
     if(inputNumAr) {
         inputNumAr.style.setProperty('direction', 'ltr', 'important');
         inputNumAr.style.setProperty('unicode-bidi', 'bidi-override', 'important');
@@ -42,19 +56,23 @@ function setupPlateInputs() {
         inputNumEn.style.setProperty('unicode-bidi', 'bidi-override', 'important');
     }
 
+    // مراقب الحدث لحقل الأرقام العربي: عند الكتابة يحول للأرقام الإنجليزية في الحقل السفلي
     if(inputNumAr) {
         inputNumAr.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/\s/g, '');
+            let val = e.target.value.replace(/\s/g, ''); // إزالة المسافات
             let enVal = '', filteredArVal = '';
             for (let char of val) {
+                // إذا كتب المستخدم رقماً إنجليزياً أو عربياً نقوم بتحويله وضبطه
                 if (numMapEn[char]) { enVal += numMapEn[char]; filteredArVal += char; }
                 else if (char >= '0' && char <= '9') { enVal += char; filteredArVal += numMapAr[char]; }
             }
+            // تحديث القيم في الحقلين مع إضافة مسافات
             inputNumAr.value = filteredArVal.split('').join(' ').trim();
             inputNumEn.value = enVal.split('').join(' ').trim();
         });
     }
 
+    // مراقب الحدث لحقل الأرقام الإنجليزي
     if(inputNumEn) {
         inputNumEn.addEventListener('input', (e) => {
             let val = e.target.value.replace(/\s/g, '');
@@ -68,15 +86,16 @@ function setupPlateInputs() {
         });
     }
 
+    // مراقب الحدث لحقل الحروف العربي
     if(inputCharAr) {
         inputCharAr.addEventListener('input', (e) => {
             let val = e.target.value.replace(/\s/g, '');
             let filteredAr = '', enVal = '';
             for (let char of val) {
-                if (char === 'ا') char = 'أ';
+                if (char === 'ا') char = 'أ'; // تصحيح حرف الألف
                 if (validArabicChars.includes(char)) { 
                     filteredAr += char; 
-                    enVal = charMapArToEn[char] + enVal; 
+                    enVal = charMapArToEn[char] + enVal; // عكس الترتيب لأن العربية يمين-يسار
                 }
             }
             inputCharAr.value = filteredAr.split('').join(' ').trim();
@@ -84,6 +103,7 @@ function setupPlateInputs() {
         });
     }
 
+    // مراقب الحدث لحقل الحروف الإنجليزي
     if(inputCharEn) {
         inputCharEn.addEventListener('input', (e) => {
             let val = e.target.value.toUpperCase().replace(/\s/g, '');
@@ -100,13 +120,20 @@ function setupPlateInputs() {
     }
 }
 
-// Map Logic
+// ==========================================
+// PART 2: Map System & Logic
+// منطق الخرائط والكاميرات
+// ==========================================
+
 let map; 
 let routingControl = null;
 let selectedWaypoints = []; 
+
+// بيانات وهمية لمواقع الكاميرات في أحياء الرياض
 const cameras = [
     { name: "حي الملقا", coords: [24.8105, 46.6112] },
     { name: "حي الصحافة", coords: [24.7963, 46.6385] },
+    // ... (بقية الكاميرات)
     { name: "حي النخيل", coords: [24.7681, 46.6318] },
     { name: "حي الياسمين", coords: [24.8192, 46.6568] },
     { name: "حي النرجس", coords: [24.8345, 46.6872] },
@@ -137,23 +164,28 @@ const cameras = [
     { name: "حي الحاير", coords: [24.4567, 46.8123] }
 ];
 
+// دالة تهيئة الخريطة
 function initMap() {
     const mapElement = document.getElementById('map');
     if (!mapElement) return;
 
+    // إعداد الخريطة ومركزها (الرياض)
     map = L.map('map', {zoomControl: false}).setView([24.7136, 46.6753], 11);
     
+    // إضافة طبقة الخريطة (CartoDB Voyager)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OSM', maxZoom: 19
     }).addTo(map);
 
+    // تحديث عداد الكاميرات في الواجهة
     const camCountEl = document.getElementById('camCount');
     if(camCountEl) camCountEl.innerText = cameras.length;
 
+    // إضافة الدبابيس (Markers) لكل كاميرا
     cameras.forEach(cam => {
         const fixedIcon = L.divIcon({
             className: '',
-            html: `<div class="pin-inner"></div>`, 
+            html: `<div class="pin-inner"></div>`, // استخدام CSS المخصص للدبوس
             iconSize: [20, 20],
             iconAnchor: [10, 10],
             tooltipAnchor: [0, -12]
@@ -161,15 +193,20 @@ function initMap() {
 
         const marker = L.marker(cam.coords, { icon: fixedIcon }).addTo(map);
         marker.bindTooltip(cam.name, { direction: 'top' });
+        
+        // عند الضغط على الكاميرا يتم تحديدها كنقطة في المسار
         marker.on('click', () => handleCameraClick(cam.coords, cam.name));
     });
 }
 
+// دالة معالجة الضغط على الكاميرا
 function handleCameraClick(coords, name) {
     const statusBox = document.getElementById('statusBox');
     const resetBtn = document.getElementById('resetBtn');
     const latlng = L.latLng(coords);
     selectedWaypoints.push(latlng);
+    
+    // منطق تحديث نص الحالة
     if (selectedWaypoints.length === 1) {
         if(statusBox) {
             statusBox.innerHTML = `البداية: <b>${name}</b><br>أكمل اختيار نقاط المسار...`;
@@ -180,11 +217,12 @@ function handleCameraClick(coords, name) {
             statusBox.innerHTML = `تم إضافة: <b>${name}</b><br>إجمالي النقاط: ${selectedWaypoints.length}`;
             statusBox.style.color = "black";
         }
-        drawRoute(selectedWaypoints);
-        if(resetBtn) resetBtn.style.display = 'block';
+        drawRoute(selectedWaypoints); // رسم الخط بين النقاط
+        if(resetBtn) resetBtn.style.display = 'block'; // إظهار زر المسح
     }
 }
 
+// دالة رسم المسار باستخدام Leaflet Routing Machine
 function drawRoute(waypoints) {
     if (routingControl) map.removeControl(routingControl);
     routingControl = L.Routing.control({
@@ -194,11 +232,12 @@ function drawRoute(waypoints) {
         draggableWaypoints: false,
         fitSelectedRoutes: true,
         show: false,
-        lineOptions: { styles: [{color: '#014B32', opacity: 0.8, weight: 6}] },
-        createMarker: function() { return null; }
+        lineOptions: { styles: [{color: '#014B32', opacity: 0.8, weight: 6}] }, // لون الخط أخضر
+        createMarker: function() { return null; } // عدم إنشاء دبابيس إضافية
     }).addTo(map);
 }
 
+// دالة مسح المسار وإعادة تعيين الخريطة
 window.resetMap = function() {
     selectedWaypoints = [];
     if (routingControl && map) {
@@ -215,6 +254,11 @@ window.resetMap = function() {
     if(map) map.setView([24.7136, 46.6753], 11);
 };
 
+// ==========================================
+// PART 3: Search Simulation Logic
+// منطق محاكاة البحث
+// ==========================================
+
 window.performSearch = function() {
     const btn = document.querySelector('button[onclick="performSearch()"]');
     const searchSection = document.getElementById('searchSection');
@@ -226,6 +270,7 @@ window.performSearch = function() {
     const numVal = inputNumEn ? inputNumEn.value : '';
     const charVal = inputCharEn ? inputCharEn.value : '';
 
+    // التحقق من أن الحقول ليست فارغة
     if (numVal.trim() === '' && charVal.trim() === '') {
         if(validationMessage) {
             validationMessage.textContent = 'الرجاء إدخال رقم اللوحة أو الأحرف';
@@ -236,13 +281,16 @@ window.performSearch = function() {
     }
     if(validationMessage) validationMessage.classList.add('hidden');
 
+    // عرض رقم اللوحة في صفحة النتائج
     const displayEl = document.getElementById('resultPlateDisplay');
     if(displayEl) displayEl.innerText = (numVal + " " + charVal).trim();
 
+    // تغيير أيقونة الزر لتدل على التحميل
     const originalContent = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>';
     btn.disabled = true;
     
+    // محاكاة تأخير الشبكة (Loading)
     setTimeout(() => {
         searchSection.classList.add('hidden-section');
         resultsSection.classList.remove('hidden-section');
@@ -253,17 +301,19 @@ window.performSearch = function() {
         btn.innerHTML = originalContent;
         btn.disabled = false;
         
+        // تحديث حجم الخريطة ورسم مسار وهمي للتجربة
         if(map) {
             map.invalidateSize();
             setTimeout(() => {
                 map.invalidateSize();
-                // مسار جاهز
+                // إحداثيات وهمية للمسار (حي الصحافة -> حي الملقا -> حي الربيع)
                 const hafaCoords = [24.7963, 46.6385]; 
                 const malqaCoords = [24.8105, 46.6112]; 
                 const rabieCoords = [24.7912, 46.6734]; 
 
                 const simulatedRoute = [L.latLng(hafaCoords), L.latLng(malqaCoords), L.latLng(rabieCoords)];
                 selectedWaypoints = simulatedRoute;
+                
                 const statusBox = document.getElementById('statusBox');
                 const resetBtn = document.getElementById('resetBtn');
                 if(statusBox) {
@@ -277,9 +327,12 @@ window.performSearch = function() {
     }, 800);
 };
 
+// دالة العودة للبحث الجديد
 window.resetSearch = function() {
     const searchSection = document.getElementById('searchSection');
     const resultsSection = document.getElementById('resultsSection');
+    
+    // إخفاء النتائج وإظهار البحث
     resultsSection.classList.add('opacity-0');
     setTimeout(() => {
         resultsSection.classList.add('hidden-section');
@@ -294,6 +347,7 @@ window.resetSearch = function() {
     }, 300);
 };
 
+// دوال التحكم في نافذة عرض الصورة
 window.showImage = function() {
     const modal = document.getElementById('imageModal');
     if(!modal) return;
@@ -321,15 +375,17 @@ window.closeImage = function() {
 }
 
 // ==========================================
-// PART 4: Navigation & Reports Logic (NEW)
+// PART 4: Navigation & Reports Logic
+// منطق التنقل والبلاغات
 // ==========================================
 
+// دالة التبديل بين التبويبات (تتبع / بلاغات)
 window.switchTab = function(tabName) {
-    // 1. Handle Navigation UI
+    // 1. تحديث شكل الأزرار في القائمة
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
-        item.classList.remove('bg-ksaGreen', 'text-white'); // Remove hardcoded styles if any
-        item.classList.add('text-gray-600', 'hover:bg-green-50'); // Add default
+        item.classList.remove('bg-ksaGreen', 'text-white'); 
+        item.classList.add('text-gray-600', 'hover:bg-green-50'); 
     });
 
     const activeBtn = document.getElementById(`nav-${tabName}`);
@@ -338,7 +394,7 @@ window.switchTab = function(tabName) {
         activeBtn.classList.remove('text-gray-600', 'hover:bg-green-50');
     }
 
-    // 2. Handle View Switching
+    // 2. إظهار وإخفاء الأقسام (Views)
     const viewTracking = document.getElementById('view-tracking');
     const viewReports = document.getElementById('view-reports');
 
@@ -346,7 +402,7 @@ window.switchTab = function(tabName) {
         viewReports.classList.add('hidden');
         viewTracking.classList.remove('hidden');
         requestAnimationFrame(() => {
-            if(map) map.invalidateSize(); // Fix map render issue when unhiding
+            if(map) map.invalidateSize(); // إصلاح مشكلة عدم ظهور الخريطة عند العودة
         });
     } else if (tabName === 'reports') {
         viewTracking.classList.add('hidden');
@@ -364,10 +420,12 @@ const stolenCarsData = [
     { id: 5543, plateNum: "2020", plateChar: "M S S", type: "اشتباه", date: "قبل أسبوع", location: "مكة - العزيزية", status: "مغلق", statusColor: "gray" },
 ];
 
+// دالة إنشاء بطاقات البلاغات وتعبئتها في الصفحة
 window.renderReports = function() {
     const grid = document.getElementById('reports-grid');
     if(!grid) return;
 
+    // استخدام map لتحويل البيانات إلى كود HTML
     grid.innerHTML = stolenCarsData.map(car => `
         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col">
             <div class="flex justify-between items-start mb-4">
