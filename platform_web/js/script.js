@@ -6,7 +6,7 @@
 */
 
 // ==========================================
-// PART 1: Plate Input Logic
+// PART 1: Plate Input Logic (كما هي بدون تغيير)
 // ==========================================
 
 const numMapAr = { '0':'٠', '1':'١', '2':'٢', '3':'٣', '4':'٤', '5':'٥', '6':'٦', '7':'٧', '8':'٨', '9':'٩' };
@@ -27,6 +27,12 @@ function setupPlateInputs() {
     const inputNumEn = document.getElementById('inputNumEn');
     const inputCharAr = document.getElementById('inputCharAr');
     const inputCharEn = document.getElementById('inputCharEn');
+
+    if(inputNumAr) {
+        inputNumAr.style.setProperty('direction', 'ltr', 'important');
+        inputNumAr.style.setProperty('unicode-bidi', 'bidi-override', 'important');
+    }
+    if(inputNumEn) inputNumEn.style.direction = 'ltr';
 
     if(inputNumAr) {
         inputNumAr.addEventListener('input', (e) => {
@@ -81,13 +87,13 @@ function setupPlateInputs() {
 }
 
 // ==========================================
-// PART 2: Map & Tracking Logic
+// PART 2: Map & Tracking Logic (تم التعديل لدعم نقاط متعددة)
 // ==========================================
 
 let map; 
 let routingControl = null;
-let startPoint = null;
-let endPoint = null;
+// التعديل: استبدال نقطة البداية والنهاية بمصفوفة تحتوي على جميع النقاط
+let selectedWaypoints = []; 
 
 const cameras = [
     { name: "حي الملقا", coords: [24.8105, 46.6112] },
@@ -155,28 +161,34 @@ function handleCameraClick(coords, name) {
     const resetBtn = document.getElementById('resetBtn');
     const latlng = L.latLng(coords);
     
-    if (!startPoint) {
-        startPoint = latlng;
+    // إضافة النقطة إلى المصفوفة
+    selectedWaypoints.push(latlng);
+
+    if (selectedWaypoints.length === 1) {
+        // إذا كانت هذه أول نقطة
         if(statusBox) {
-            statusBox.innerHTML = `البداية: <b>${name}</b><br>اختر الوجهة...`;
+            statusBox.innerHTML = `البداية: <b>${name}</b><br>أكمل اختيار نقاط المسار...`;
             statusBox.style.color = "#014B32"; 
         }
-    } else if (!endPoint) {
-        if (latlng.equals(startPoint)) return;
-        endPoint = latlng;
+    } else {
+        // إذا كان هناك أكثر من نقطة، نقوم بتحديث المسار ليشمل كل النقاط
         if(statusBox) {
-            statusBox.innerHTML = `المسار إلى: <b>${name}</b>`;
+            statusBox.innerHTML = `تم إضافة: <b>${name}</b><br>إجمالي النقاط: ${selectedWaypoints.length}`;
             statusBox.style.color = "black";
         }
-        drawRoute(startPoint, endPoint);
+        
+        // رسم المسار باستخدام جميع النقاط في المصفوفة
+        drawRoute(selectedWaypoints);
+        
         if(resetBtn) resetBtn.style.display = 'block';
     }
 }
 
-function drawRoute(s, e) {
+function drawRoute(waypoints) {
     if (routingControl) map.removeControl(routingControl);
+    
     routingControl = L.Routing.control({
-        waypoints: [s, e],
+        waypoints: waypoints, // تمرير مصفوفة النقاط بالكامل
         routeWhileDragging: false,
         addWaypoints: false,
         draggableWaypoints: false,
@@ -189,8 +201,8 @@ function drawRoute(s, e) {
 
 // Global functions for buttons
 window.resetMap = function() {
-    startPoint = null; 
-    endPoint = null;
+    selectedWaypoints = []; // تفريغ مصفوفة النقاط
+    
     if (routingControl && map) {
         map.removeControl(routingControl);
         routingControl = null;
