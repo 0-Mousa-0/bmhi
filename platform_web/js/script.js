@@ -12,9 +12,9 @@
 
 const numMapAr = { '0':'٠', '1':'١', '2':'٢', '3':'٣', '4':'٤', '5':'٥', '6':'٦', '7':'٧', '8':'٨', '9':'٩' };
 const numMapEn = { '٠':'0', '١':'1', '٢':'2', '٣':'3', '٤':'4', '٥':'5', '٦':'6', '٧':'7', '٨':'8', '٩':'9' };
-const validArabicChars = 'أابجد رسمصط عقكلمنهـوى';
-const validEnglishChars = 'ABJDRSCTEGKLMNHUI';
-const charMapArToEn = { 'أ':'A', 'ب':'B', 'ج':'J', 'د':'D', 'ر':'R', 'س':'S', 'ص':'C', 'ط':'T', 'ع':'E', 'ق':'G', 'ك':'K', 'ل':'L', 'م':'M', 'ن':'N', 'ه':'H', 'و':'U', 'ى':'I' };
+const validArabicChars = 'أابحد رسمصط عقكلمنهـوى';
+const validEnglishChars = 'ABJDRSXTEGKLZNHUV';
+const charMapArToEn = { 'أ':'A', 'ب':'B', 'ح':'J', 'د':'D', 'ر':'R', 'س':'S', 'ص':'X', 'ط':'T', 'ع':'E', 'ق':'G', 'ك':'K', 'ل':'L', 'م':'Z', 'ن':'N', 'ه':'H', 'و':'U', 'ى':'V' };
 const charMapEnToAr = {};
 for (let key in charMapArToEn) charMapEnToAr[charMapArToEn[key]] = key;
 
@@ -65,13 +65,20 @@ function setupPlateInputs() {
         });
     }
 
+    // --- التعديل هنا لعكس ترتيب الأحرف ---
+
     if(inputCharAr) {
         inputCharAr.addEventListener('input', (e) => {
             let val = e.target.value.replace(/\s/g, '');
             let filteredAr = '', enVal = '';
             for (let char of val) {
                 if (char === 'ا') char = 'أ';
-                if (validArabicChars.includes(char)) { filteredAr += char; enVal += charMapArToEn[char]; }
+                if (validArabicChars.includes(char)) { 
+                    filteredAr += char; 
+                    // التغيير هنا: نضع الحرف الجديد في البداية لعكس الترتيب
+                    // بدلاً من enVal += ...
+                    enVal = charMapArToEn[char] + enVal; 
+                }
             }
             inputCharAr.value = filteredAr.split('').join(' ').trim();
             inputCharEn.value = enVal.split('').join(' ').trim();
@@ -83,7 +90,11 @@ function setupPlateInputs() {
             let val = e.target.value.toUpperCase().replace(/\s/g, '');
             let filteredEn = '', arVal = '';
             for (let char of val) {
-                if (validEnglishChars.includes(char)) { filteredEn += char; arVal += charMapEnToAr[char]; }
+                if (validEnglishChars.includes(char)) { 
+                    filteredEn += char; 
+                    // التغيير هنا أيضاً: نضع الحرف العربي المترجم في البداية
+                    arVal = charMapEnToAr[char] + arVal; 
+                }
             }
             inputCharEn.value = filteredEn.split('').join(' ').trim();
             inputCharAr.value = arVal.split('').join(' ').trim();
