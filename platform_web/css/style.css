@@ -49,36 +49,20 @@
     display: none; 
 }
 
-/* Footer Specific Styles */
-.footer-link {
-    color: #ffffff;
-    opacity: 0.9;
-    transition: opacity 0.2s;
-    font-size: 0.9rem;
-    display: block;
-    margin-bottom: 0.5rem;
-    text-decoration: none;
+/* Active Tab Style - Fix Hover Issue */
+.nav-item.active {
+    background-color: #014B32 !important;
+    color: white !important;
 }
 
-.footer-link:hover {
-    opacity: 1;
-    text-decoration: underline;
+/* لمنع تغير لون النص إلى الأخضر عند تمرير الماوس على العنصر النشط */
+.nav-item.active:hover {
+    color: white !important; 
+    background-color: #015c3e !important; /* لون أفتح قليلاً عند الهوفر */
 }
 
-.footer-icon-box {
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 4px;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
-    color: white;
-}
-
-.footer-icon-box:hover {
-    background-color: white;
-    color: #014B32;
-    border-color: white;
+/* أيقونة العنصر النشط تظل بيضاء */
+.nav-item.active .icon-box {
+    background-color: rgba(255,255,255,0.2) !important;
+    color: white !important;
 }

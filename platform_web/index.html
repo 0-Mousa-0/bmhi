@@ -43,16 +43,19 @@
             display: none; font-size: 0.9rem;
         }
         .btn-reset:hover { background: #1f2937; }
-        
-        /* إخفاء نافذة التوجيهات الافتراضية */
         .leaflet-routing-container { display: none !important; }
+
+        /* Active Tab Style */
+        .nav-item.active {
+            background-color: #014B32;
+            color: white;
+        }
     </style>
 </head>
-<body class="bg-white font-sans text-gray-800 flex flex-col min-h-screen">
+<body class="bg-gray-50 font-sans text-gray-800 flex flex-col h-screen overflow-hidden">
 
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 h-20 shadow-sm">
+    <header class="bg-white border-b border-gray-200 h-20 shadow-sm flex-shrink-0 z-50">
         <div class="container mx-auto px-4 h-full flex items-center justify-between">
-            
             <div class="flex items-center gap-8 h-full">
                 <div class="flex items-center gap-3 border-l pl-6 border-gray-200 h-12 cursor-pointer" onclick="location.reload()">
                     <div class="flex flex-col items-end">
@@ -65,10 +68,7 @@
                     </svg>
                 </div>
             </div>
-
             <div class="flex items-center gap-4">
-                <div class="relative">
-                </div>
                 <button class="flex items-center gap-2 text-gray-700 font-bold text-sm hover:text-ksaGreen px-2">
                     <span>English</span>
                     <i class="fa-solid fa-globe text-lg"></i>
@@ -77,200 +77,190 @@
         </div>
     </header>
 
-    <main class="flex-grow container mx-auto px-4 py-12 relative">
+    <div class="flex flex-1 overflow-hidden">
         
-        <section id="searchSection" class="max-w-5xl mx-auto transition-all duration-700">
-            
-            <div class="text-center mb-12 fade-in-up">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">تتبع المركبات</h2>
-                <p class="text-gray-500">أدخل رقم اللوحة أدناه لتتبع المركبة</p>
-                <div id="validationMessage" class="mt-4 text-red-600 font-bold hidden">
-                    الرجاء إدخال رقم اللوحة أو الأحرف
-                </div>
+        <aside class="w-64 bg-white border-l border-gray-200 flex flex-col pt-6 pb-6 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40">
+    <div class="px-6 mb-8">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">القائمة الرئيسية</p>
+    </div>
+    
+    <nav class="flex-1 space-y-2 px-3">
+        <button onclick="switchTab('tracking')" id="nav-tracking" class="nav-item active w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-green-50 hover:text-ksaGreen transition-all duration-200 group">
+            <div class="icon-box w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-green-100 flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-car text-lg"></i> </div>
+            <span class="font-bold">تتبع مركبة</span>
+        </button>
+
+        <button onclick="switchTab('reports')" id="nav-reports" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-green-50 hover:text-ksaGreen transition-all duration-200 group">
+            <div class="icon-box w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-green-100 flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-file-shield text-lg"></i>
             </div>
+            <span class="font-bold">البلاغات</span>
+            <span class="mr-auto bg-red-100 text-red-600 py-0.5 px-2 rounded-md text-xs font-bold">جديد</span>
+        </button>
+    </nav>
 
-            <div class="bg-white p-8 md:p-12 rounded-3xl shadow-plate border border-gray-100 fade-in-up" style="animation-delay: 0.1s;">
-                <div class="flex flex-col items-center w-full">
-                    <div class="w-full max-w-[500px] relative">
-                        <div class="flex justify-between mb-3 px-2">
-                            <span class="text-sm font-bold text-gray-400">أكتب بيانات اللوحة</span>
-                        </div>
-
-                        <div class="flex flex-row-reverse border-[4px] border-black rounded-xl overflow-hidden h-36 bg-white shadow-lg transform hover:scale-[1.01] transition duration-300">
-                            
-                            <div class="flex-1 border-r-[4px] border-black flex flex-col">
-                                <div class="h-1/2 border-b-[2px] border-black/10 flex items-center justify-center bg-gray-50/50 relative">
-                                    <input type="text" id="inputNumAr" class="plate-input plate-text-ar text-gray-800 text-lg" placeholder="١ ٢ ٣ ٤" maxlength="6">
-                                </div>
-                                <div class="h-1/2 flex items-center justify-center bg-white relative">
-                                    <input type="text" id="inputNumEn" class="plate-input plate-text-en text-gray-800 text-lg uppercase" placeholder="1 2 3 4" maxlength="6">
-                                </div>
-                            </div>
-
-                            <div class="w-20 border-r-[4px] border-black flex flex-col items-center justify-between py-8 bg-white">
-                                <span class="text-sm font-extrabold text-black tracking-widest">السعودية</span>
-                                <div class="w-14 h-14 text-ksaGreen flex items-center justify-center">
-                                    </div>
-                                <span class="text-sm font-extrabold text-black transform rotate-90 whitespace-nowrap tracking-[8px] mb-1">KSA</span>
-                            </div>
-
-                            <div class="flex-1 flex flex-col">
-                                <div class="h-1/2 border-b-[2px] border-black/10 flex items-center justify-center bg-gray-50/50 relative">
-                                    <input type="text" id="inputCharAr" class="plate-input plate-text-ar text-gray-800 text-lg" placeholder="أ ب د" maxlength="4">
-                                </div>
-                                <div class="h-1/2 flex items-center justify-center bg-white relative">
-                                    <input type="text" id="inputCharEn" class="plate-input plate-text-en text-gray-800 text-lg uppercase" placeholder="A B D" maxlength="4">
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div class="w-full max-w-[500px] mt-8">
-                        <button onclick="performSearch()" class="w-full h-16 rounded-xl bg-ksaGreen text-white font-bold text-xl shadow-lg hover:bg-ksaGreen-light transition-all flex items-center justify-center gap-3">
-                            <i class="fa-solid fa-magnifying-glass text-2xl"></i>
-                            <span>بحث</span>
-                        </button>
-                    </div>
-
+    <div class="px-6 mt-auto">
+        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-ksaGreen text-white flex items-center justify-center font-bold">
+                    ع
                 </div>
-            </div>
-        </section>
-
-        <section id="resultsSection" class="hidden-section opacity-0 transition-opacity duration-700 mt-6">
-            <div class="flex items-center justify-between mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-ksaGreen">
-                        <i class="fa-solid fa-car text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-800">نتائج التتبع</h3>
-                        <p class="text-sm text-gray-500">رقم اللوحة: <span id="resultPlateDisplay" class="font-mono font-bold text-black">1234 ABD</span></p>
-                    </div>
-                </div>
-                <button onclick="resetSearch()" class="px-4 py-2 text-sm font-bold text-gray-500 bg-gray-50 rounded hover:bg-gray-100 hover:text-ksaGreen transition">
-                    <i class="fa-solid fa-rotate-right ml-1"></i> بحث جديد
-                </button>
-            </div>
-
-            <div class="grid lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 h-[500px] relative">
-                    <div class="control-panel">
-                        <h3 class="font-bold text-gray-800 mb-1">نظام المراقبة الحية</h3>
-                        <div style="font-size:12px; color:#666; margin-bottom:5px;">كاميرات نشطة: <b id="camCount">0</b></div>
-                        <div id="statusBox" class="status-box">حدد نقطة البداية للمركبة...</div>
-                        <button id="resetBtn" class="btn-reset" onclick="resetMap()">مسح المسار</button>
-                    </div>
-                    <div id="map"></div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-[500px] overflow-y-auto">
-                    <h4 class="font-bold text-gray-800 text-lg mb-6 flex items-center gap-2">
-                        <i class="fa-solid fa-list-ul text-ksaGreen"></i> سجل التحركات
-                    </h4>
-                    
-                    <div class="relative border-r-2 border-gray-100 mr-2 space-y-8">
-                        
-                        <div class="relative mr-8 group">
-                            <span class="absolute -right-[41px] top-0 w-5 h-5 bg-ksaGreen rounded-full border-4 border-white shadow"></span>
-                            <div class="p-4 bg-green-50 rounded-xl border border-green-100 flex justify-between items-center">
-                                <div>
-                                    <p class="font-bold text-gray-800">حي الربيع</p>
-                                    <p class="text-xs text-gray-500 mt-1 flex gap-2">
-                                        <span>الاثنين</span>
-                                        <span>11:35 ص</span>
-                                    </p>
-                                </div>
-                                <button onclick="showImage()" class="w-8 h-8 rounded-full bg-white border border-green-200 flex items-center justify-center text-ksaGreen hover:bg-ksaGreen hover:text-white transition-all shadow-sm" title="عرض صورة الرصد">
-                                    <i class="fa-regular fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="relative mr-8">
-                            <span class="absolute -right-[39px] top-1 w-4 h-4 bg-gray-300 rounded-full border-2 border-white"></span>
-                            <div class="py-1 flex justify-between items-center px-2 hover:bg-gray-50 rounded-lg transition-colors">
-                                <div>
-                                    <p class="font-bold text-gray-600">حي الملقا</p>
-                                    <p class="text-xs text-gray-400 mt-1">الاثنين - 10:35 ص</p>
-                                </div>
-                                <button onclick="showImage()" class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-ksaGreen hover:text-white transition-all hover:border-ksaGreen" title="عرض صورة الرصد">
-                                    <i class="fa-regular fa-eye text-xs"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="relative mr-8">
-                            <span class="absolute -right-[39px] top-1 w-4 h-4 bg-gray-300 rounded-full border-2 border-white"></span>
-                            <div class="py-1 flex justify-between items-center px-2 hover:bg-gray-50 rounded-lg transition-colors">
-                                <div>
-                                    <p class="font-bold text-gray-600">حي الصحافة</p>
-                                    <p class="text-xs text-gray-400 mt-1">الاثنين - 10:15 ص</p>
-                                </div>
-                                <button onclick="showImage()" class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-ksaGreen hover:text-white transition-all hover:border-ksaGreen" title="عرض صورة الرصد">
-                                    <i class="fa-regular fa-eye text-xs"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="bg-ksaGreen text-white mt-auto pt-12 pb-6 border-t-4 border-[#003826]">
-        <div class="container mx-auto px-6">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-right mb-12">
-                
                 <div>
-                    <h4 class="font-bold text-lg mb-5 text-white border-b border-white/20 pb-2 inline-block">ملخص</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="footer-link">حول منصه تتبع المركبات</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-bold text-lg mb-5 text-white border-b border-white/20 pb-2 inline-block">روابط مهمة</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="footer-link">بوابة تتبع المركبات</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-bold text-lg mb-5 text-white border-b border-white/20 pb-2 inline-block">الاتصال والدعم</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="footer-link">تواصل معنا</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <div class="mb-8">
-                        <h4 class="font-bold text-lg mb-4 text-white">تابعنا على</h4>
-                        <div class="flex gap-2 justify-end">
-                            <a href="#" class="footer-icon-box"><i class="fa-brands fa-instagram text-lg"></i></a>
-                            <a href="#" class="footer-icon-box"><i class="fa-brands fa-linkedin-in text-lg"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="border-t border-white/20 pt-6">
-                <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
-                    
-                    <div class="flex gap-4 text-sm text-white/80">
-                        <a href="#" class="hover:text-white hover:underline">رابط</a>
-                    </div>
-
-                    <div class="text-center lg:text-right text-sm text-white/80 space-y-1">
-                        <p>هذي المنصه نفذت لهاكثون ابشر © 2025</p>
-                    </div>
-
+                    <p class="text-sm font-bold text-gray-800">عبدالله محمد</p>
+                    <p class="text-xs text-gray-500">مشرف عمليات</p>
                 </div>
             </div>
         </div>
-    </footer>
+    </div>
+</aside>
+
+        <main class="flex-1 overflow-y-auto bg-[#F7F9FC] relative p-8">
+            
+            <div id="view-tracking" class="max-w-7xl mx-auto min-h-full flex flex-col">
+                <section id="searchSection" class="max-w-5xl mx-auto w-full transition-all duration-700 mt-8">
+                    <div class="text-center mb-12 fade-in-up">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">تتبع المركبات</h2>
+                        <p class="text-gray-500">أدخل رقم اللوحة أدناه لتتبع المركبة</p>
+                        <div id="validationMessage" class="mt-4 text-red-600 font-bold hidden">
+                            الرجاء إدخال رقم اللوحة أو الأحرف
+                        </div>
+                    </div>
+        
+                    <div class="bg-white p-8 md:p-12 rounded-3xl shadow-plate border border-gray-100 fade-in-up" style="animation-delay: 0.1s;">
+                        <div class="flex flex-col items-center w-full">
+                            <div class="w-full max-w-[500px] relative">
+                                <div class="flex justify-between mb-3 px-2">
+                                    <span class="text-sm font-bold text-gray-400">أكتب بيانات اللوحة</span>
+                                </div>
+                                <div class="flex flex-row-reverse border-[4px] border-black rounded-xl overflow-hidden h-36 bg-white shadow-lg transform hover:scale-[1.01] transition duration-300">
+                                    <div class="flex-1 border-r-[4px] border-black flex flex-col">
+                                        <div class="h-1/2 border-b-[2px] border-black/10 flex items-center justify-center bg-gray-50/50 relative">
+                                            <input type="text" id="inputNumAr" class="plate-input plate-text-ar text-gray-800 text-lg" placeholder="١ ٢ ٣ ٤" maxlength="6">
+                                        </div>
+                                        <div class="h-1/2 flex items-center justify-center bg-white relative">
+                                            <input type="text" id="inputNumEn" class="plate-input plate-text-en text-gray-800 text-lg uppercase" placeholder="1 2 3 4" maxlength="6">
+                                        </div>
+                                    </div>
+                                    <div class="w-20 border-r-[4px] border-black flex flex-col items-center justify-between py-8 bg-white">
+                                        <span class="text-sm font-extrabold text-black tracking-widest">السعودية</span>
+                                        <div class="w-14 h-14 text-ksaGreen flex items-center justify-center"></div>
+                                        <span class="text-sm font-extrabold text-black transform rotate-90 whitespace-nowrap tracking-[8px] mb-1">KSA</span>
+                                    </div>
+                                    <div class="flex-1 flex flex-col">
+                                        <div class="h-1/2 border-b-[2px] border-black/10 flex items-center justify-center bg-gray-50/50 relative">
+                                            <input type="text" id="inputCharAr" class="plate-input plate-text-ar text-gray-800 text-lg" placeholder="أ ب د" maxlength="4">
+                                        </div>
+                                        <div class="h-1/2 flex items-center justify-center bg-white relative">
+                                            <input type="text" id="inputCharEn" class="plate-input plate-text-en text-gray-800 text-lg uppercase" placeholder="A B D" maxlength="4">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="w-full max-w-[500px] mt-8">
+                                <button onclick="performSearch()" class="w-full h-16 rounded-xl bg-ksaGreen text-white font-bold text-xl shadow-lg hover:bg-ksaGreen-light transition-all flex items-center justify-center gap-3">
+                                    <i class="fa-solid fa-magnifying-glass text-2xl"></i>
+                                    <span>بحث</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+        
+                <section id="resultsSection" class="hidden-section opacity-0 transition-opacity duration-700 mt-6 w-full">
+                    <div class="flex items-center justify-between mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-ksaGreen">
+                                <i class="fa-solid fa-car text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">نتائج التتبع</h3>
+                                <p class="text-sm text-gray-500">رقم اللوحة: <span id="resultPlateDisplay" class="font-mono font-bold text-black">1234 ABD</span></p>
+                            </div>
+                        </div>
+                        <button onclick="resetSearch()" class="px-4 py-2 text-sm font-bold text-gray-500 bg-gray-50 rounded hover:bg-gray-100 hover:text-ksaGreen transition">
+                            <i class="fa-solid fa-rotate-right ml-1"></i> بحث جديد
+                        </button>
+                    </div>
+        
+                    <div class="grid lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 h-[500px] relative">
+                            <div class="control-panel">
+                                <h3 class="font-bold text-gray-800 mb-1">نظام المراقبة الحية</h3>
+                                <div style="font-size:12px; color:#666; margin-bottom:5px;">كاميرات نشطة: <b id="camCount">0</b></div>
+                                <div id="statusBox" class="status-box">حدد نقطة البداية للمركبة...</div>
+                                <button id="resetBtn" class="btn-reset" onclick="resetMap()">مسح المسار</button>
+                            </div>
+                            <div id="map"></div>
+                        </div>
+        
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-[500px] overflow-y-auto">
+                            <h4 class="font-bold text-gray-800 text-lg mb-6 flex items-center gap-2">
+                                <i class="fa-solid fa-list-ul text-ksaGreen"></i> سجل التحركات
+                            </h4>
+                            <div class="relative border-r-2 border-gray-100 mr-2 space-y-8">
+                                <div class="relative mr-8 group">
+                                    <span class="absolute -right-[41px] top-0 w-5 h-5 bg-ksaGreen rounded-full border-4 border-white shadow"></span>
+                                    <div class="p-4 bg-green-50 rounded-xl border border-green-100 flex justify-between items-center">
+                                        <div>
+                                            <p class="font-bold text-gray-800">حي الربيع</p>
+                                            <p class="text-xs text-gray-500 mt-1 flex gap-2">
+                                                <span>الاثنين</span>
+                                                <span>11:35 ص</span>
+                                            </p>
+                                        </div>
+                                        <button onclick="showImage()" class="w-8 h-8 rounded-full bg-white border border-green-200 flex items-center justify-center text-ksaGreen hover:bg-ksaGreen hover:text-white transition-all shadow-sm">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="relative mr-8">
+                                    <span class="absolute -right-[39px] top-1 w-4 h-4 bg-gray-300 rounded-full border-2 border-white"></span>
+                                    <div class="py-1 flex justify-between items-center px-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                        <div>
+                                            <p class="font-bold text-gray-600">حي الملقا</p>
+                                            <p class="text-xs text-gray-400 mt-1">الاثنين - 10:35 ص</p>
+                                        </div>
+                                        <button onclick="showImage()" class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-ksaGreen hover:text-white transition-all hover:border-ksaGreen">
+                                            <i class="fa-regular fa-eye text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="relative mr-8">
+                                    <span class="absolute -right-[39px] top-1 w-4 h-4 bg-gray-300 rounded-full border-2 border-white"></span>
+                                    <div class="py-1 flex justify-between items-center px-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                        <div>
+                                            <p class="font-bold text-gray-600">حي الصحافة</p>
+                                            <p class="text-xs text-gray-400 mt-1">الاثنين - 10:15 ص</p>
+                                        </div>
+                                        <button onclick="showImage()" class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-ksaGreen hover:text-white transition-all hover:border-ksaGreen">
+                                            <i class="fa-regular fa-eye text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="view-reports" class="max-w-7xl mx-auto hidden fade-in-up">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">بلاغات المركبات المسروقة</h2>
+                        <p class="text-gray-500 mt-2">قائمة بالمركبات المبلغ عن سرقتها حديثاً</p>
+                    </div>
+                    <div class="bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm text-sm font-bold text-gray-600">
+                        <i class="fa-solid fa-filter text-ksaGreen ml-2"></i> تصفية النتائج
+                    </div>
+                </div>
+
+                <div id="reports-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+            </div>
+
+        </main>
+    </div>
 
     <div id="imageModal" class="fixed inset-0 z-[2000] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity opacity-0">
         <div class="relative bg-white p-2 rounded-lg shadow-2xl max-w-2xl w-full mx-4 transform scale-95 transition-transform duration-300">
