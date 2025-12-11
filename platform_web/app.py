@@ -77,13 +77,23 @@ def init_db():
                 {"name": "حي السويدي", "coords": COORDS["Suwaidi"], "time": "10:00 ص", "date": "قبل أسبوع"}
             ]
         },
-        # 7. 506 BUD (Your Test Car)
+        # 7. 506 BUD (Badr Alshaya)
         {
             "plate_clean": "506BUD", "plate_display": "506 BUD", "owner": "Badr Alshaya", "status": "active",
             "history": [
                 {"name": "حي الربيع", "coords": COORDS["Rabie"], "time": "09:45 م", "date": "اليوم"},
                 {"name": "حي الصحافة", "coords": COORDS["Sahafa"], "time": "09:30 م", "date": "اليوم"},
                 {"name": "حي الملقا", "coords": COORDS["Malqa"], "time": "09:00 م", "date": "اليوم"}
+            ]
+        },
+
+        # 8. 5873 NER (Haitham alsheri)
+        {
+            "plate_clean": "5873NER", "plate_display": "5873 NER", "owner": "Hatiam alsheri", "status": "active",
+            "history": [
+                {"name": "حي العزيزية", "coords": COORDS["Aziziyah"], "time": "09:45 م", "date": "اليوم"},
+                {"name": "حي الصحافة", "coords": COORDS["Sahafa"], "time": "09:30 م", "date": "اليوم"},
+                {"name": "حي السليمانية", "coords": COORDS["Suleimaniyah"], "time": "09:00 م", "date": "اليوم"}
             ]
         }
     ]
