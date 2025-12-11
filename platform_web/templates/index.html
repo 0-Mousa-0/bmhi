@@ -206,46 +206,10 @@
                             <h4 class="font-bold text-gray-800 text-lg mb-6 flex items-center gap-2">
                                 <i class="fa-solid fa-list-ul text-ksaGreen"></i> سجل التحركات
                             </h4>
-                            <div class="relative border-r-2 border-gray-100 mr-2 space-y-8">
-                                <div class="relative mr-8 group">
-                                    <span class="absolute -right-[41px] top-0 w-5 h-5 bg-ksaGreen rounded-full border-4 border-white shadow"></span>
-                                    <div class="p-4 bg-green-50 rounded-xl border border-green-100 flex justify-between items-center">
-                                        <div>
-                                            <p class="font-bold text-gray-800">حي الربيع</p>
-                                            <p class="text-xs text-gray-500 mt-1 flex gap-2">
-                                                <span>الاثنين</span>
-                                                <span>11:35 ص</span>
-                                            </p>
-                                        </div>
-                                        <button onclick="showImage()" class="w-8 h-8 rounded-full bg-white border border-green-200 flex items-center justify-center text-ksaGreen hover:bg-ksaGreen hover:text-white transition-all shadow-sm">
-                                            <i class="fa-regular fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="relative mr-8">
-                                    <span class="absolute -right-[39px] top-1 w-4 h-4 bg-gray-300 rounded-full border-2 border-white"></span>
-                                    <div class="py-1 flex justify-between items-center px-2 hover:bg-gray-50 rounded-lg transition-colors">
-                                        <div>
-                                            <p class="font-bold text-gray-600">حي الملقا</p>
-                                            <p class="text-xs text-gray-400 mt-1">الاثنين - 10:35 ص</p>
-                                        </div>
-                                        <button onclick="showImage()" class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-ksaGreen hover:text-white transition-all hover:border-ksaGreen">
-                                            <i class="fa-regular fa-eye text-xs"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="relative mr-8">
-                                    <span class="absolute -right-[39px] top-1 w-4 h-4 bg-gray-300 rounded-full border-2 border-white"></span>
-                                    <div class="py-1 flex justify-between items-center px-2 hover:bg-gray-50 rounded-lg transition-colors">
-                                        <div>
-                                            <p class="font-bold text-gray-600">حي الصحافة</p>
-                                            <p class="text-xs text-gray-400 mt-1">الاثنين - 10:15 ص</p>
-                                        </div>
-                                        <button onclick="showImage()" class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-ksaGreen hover:text-white transition-all hover:border-ksaGreen">
-                                            <i class="fa-regular fa-eye text-xs"></i>
-                                        </button>
-                                    </div>
-                                </div>
+
+                            <div id="movementLogContainer" class="relative border-r-2 border-gray-100 mr-2 space-y-8">
+                                <p class="text-gray-400 text-sm p-4">قم بالبحث لعرض السجل...</p>
+                                
                             </div>
                         </div>
                     </div>
@@ -271,7 +235,7 @@
     </div>
 
     <div id="imageModal" class="fixed inset-0 z-[2000] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity opacity-0">
-        <div class="relative bg-white p-2 rounded-lg shadow-2xl max-w-2xl w-full mx-4 transform scale-95 transition-transform duration-300">
+        <div class="relative bg-white p-2 rounded-lg shadow-2xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
             <button onclick="closeImage()" class="absolute -top-10 left-0 text-white hover:text-gray-300 text-3xl font-bold p-2">
                 <i class="fa-solid fa-xmark"></i>
             </button>

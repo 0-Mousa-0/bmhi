@@ -1,139 +1,25 @@
 /*
    Main Logic Script
-   السكريبت الرئيسي للمشروع
-   
-   يقوم بمعالجة:
-   1. إدخالات اللوحة والتحقق منها (ربط العربي بالإنجليزي).
-   2. نظام الخرائط والتوجيه (باستخدام مكتبة Leaflet).
-   3. نافذة عرض الصور (Modal).
-   4. التنقل بين الصفحات وعرض البلاغات.
+   السكريبت الرئيسي للمشروع - النسخة النهائية المتصلة بقاعدة البيانات
 */
 
 // ==========================================
-// تعريف ثوابت التحويل بين العربي والإنجليزي
+// 1. Constants & Configuration
 // ==========================================
 
-// تحويل الأرقام
+// Maps for Arabic <-> English conversion
 const numMapAr = { '0':'٠', '1':'١', '2':'٢', '3':'٣', '4':'٤', '5':'٥', '6':'٦', '7':'٧', '8':'٨', '9':'٩' };
 const numMapEn = { '٠':'0', '١':'1', '٢':'2', '٣':'3', '٤':'4', '٥':'5', '٦':'6', '٧':'7', '٨':'8', '٩':'9' };
-
-// الحروف المسموح بها في اللوحات السعودية
 const validArabicChars = 'أابحد رسمصط عقكلمنهـوى';
 const validEnglishChars = 'ABJDRSXTEGKLZNHUV';
-
-// خريطة تحويل الحروف من عربي إلى إنجليزي
 const charMapArToEn = { 'أ':'A', 'ب':'B', 'ح':'J', 'د':'D', 'ر':'R', 'س':'S', 'ص':'X', 'ط':'T', 'ع':'E', 'ق':'G', 'ك':'K', 'ل':'L', 'م':'Z', 'ن':'N', 'ه':'H', 'و':'U', 'ى':'V' };
-
-// إنشاء خريطة عكسية (من إنجليزي إلى عربي) تلقائياً
 const charMapEnToAr = {};
 for (let key in charMapArToEn) charMapEnToAr[charMapArToEn[key]] = key;
 
-// عند اكتمال تحميل الصفحة، قم بتشغيل الدوال الأساسية
-document.addEventListener('DOMContentLoaded', () => {
-    setupPlateInputs(); // تجهيز حقول الإدخال
-    initMap();          // تشغيل الخريطة
-    renderReports();    // عرض قائمة البلاغات
-});
-
-// ==========================================
-// PART 1: Plate Input Logic
-// منطق حقول إدخال اللوحة
-// ==========================================
-
-function setupPlateInputs() {
-    const inputNumAr = document.getElementById('inputNumAr');
-    const inputNumEn = document.getElementById('inputNumEn');
-    const inputCharAr = document.getElementById('inputCharAr');
-    const inputCharEn = document.getElementById('inputCharEn');
-
-    // إجبار اتجاه النص ليكون من اليسار لليمين حتى في الحقول العربية لضبط المحاذاة
-    if(inputNumAr) {
-        inputNumAr.style.setProperty('direction', 'ltr', 'important');
-        inputNumAr.style.setProperty('unicode-bidi', 'bidi-override', 'important');
-    }
-    if(inputNumEn) {
-        inputNumEn.style.setProperty('direction', 'ltr', 'important');
-        inputNumEn.style.setProperty('unicode-bidi', 'bidi-override', 'important');
-    }
-
-    // مراقب الحدث لحقل الأرقام العربي: عند الكتابة يحول للأرقام الإنجليزية في الحقل السفلي
-    if(inputNumAr) {
-        inputNumAr.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/\s/g, ''); // إزالة المسافات
-            let enVal = '', filteredArVal = '';
-            for (let char of val) {
-                // إذا كتب المستخدم رقماً إنجليزياً أو عربياً نقوم بتحويله وضبطه
-                if (numMapEn[char]) { enVal += numMapEn[char]; filteredArVal += char; }
-                else if (char >= '0' && char <= '9') { enVal += char; filteredArVal += numMapAr[char]; }
-            }
-            // تحديث القيم في الحقلين مع إضافة مسافات
-            inputNumAr.value = filteredArVal.split('').join(' ').trim();
-            inputNumEn.value = enVal.split('').join(' ').trim();
-        });
-    }
-
-    // مراقب الحدث لحقل الأرقام الإنجليزي
-    if(inputNumEn) {
-        inputNumEn.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/\s/g, '');
-            let arVal = '', filteredEnVal = '';
-            for (let char of val) {
-                if (char >= '0' && char <= '9') { arVal += numMapAr[char]; filteredEnVal += char; }
-                else if (numMapEn[char]) { arVal += char; filteredEnVal += numMapEn[char]; }
-            }
-            inputNumEn.value = filteredEnVal.split('').join(' ').trim();
-            inputNumAr.value = arVal.split('').join(' ').trim();
-        });
-    }
-
-    // مراقب الحدث لحقل الحروف العربي
-    if(inputCharAr) {
-        inputCharAr.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/\s/g, '');
-            let filteredAr = '', enVal = '';
-            for (let char of val) {
-                if (char === 'ا') char = 'أ'; // تصحيح حرف الألف
-                if (validArabicChars.includes(char)) { 
-                    filteredAr += char; 
-                    enVal = charMapArToEn[char] + enVal; // عكس الترتيب لأن العربية يمين-يسار
-                }
-            }
-            inputCharAr.value = filteredAr.split('').join(' ').trim();
-            inputCharEn.value = enVal.split('').join(' ').trim();
-        });
-    }
-
-    // مراقب الحدث لحقل الحروف الإنجليزي
-    if(inputCharEn) {
-        inputCharEn.addEventListener('input', (e) => {
-            let val = e.target.value.toUpperCase().replace(/\s/g, '');
-            let filteredEn = '', arVal = '';
-            for (let char of val) {
-                if (validEnglishChars.includes(char)) { 
-                    filteredEn += char; 
-                    arVal = charMapEnToAr[char] + arVal; 
-                }
-            }
-            inputCharEn.value = filteredEn.split('').join(' ').trim();
-            inputCharAr.value = arVal.split('').join(' ').trim();
-        });
-    }
-}
-
-// ==========================================
-// PART 2: Map System & Logic
-// منطق الخرائط والكاميرات
-// ==========================================
-
-let map; 
-let routingControl = null;
-let selectedWaypoints = []; 
-
-// بيانات وهمية لمواقع الكاميرات في أحياء الرياض
+// Full Camera List (Must match Python Database coordinates)
 const cameras = [
     { name: "حي الملقا", coords: [24.8105, 46.6112] },
     { name: "حي الصحافة", coords: [24.7963, 46.6385] },
-    // ... (بقية الكاميرات)
     { name: "حي النخيل", coords: [24.7681, 46.6318] },
     { name: "حي الياسمين", coords: [24.8192, 46.6568] },
     { name: "حي النرجس", coords: [24.8345, 46.6872] },
@@ -164,49 +50,140 @@ const cameras = [
     { name: "حي الحاير", coords: [24.4567, 46.8123] }
 ];
 
-// دالة تهيئة الخريطة
+let map; 
+let routingControl = null;
+let selectedWaypoints = []; 
+
+// ==========================================
+// 2. Initialization
+// ==========================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupPlateInputs();
+    initMap();
+    renderReports();
+});
+
+// ==========================================
+// 3. Plate Inputs Logic
+// ==========================================
+
+function setupPlateInputs() {
+    const inputNumAr = document.getElementById('inputNumAr');
+    const inputNumEn = document.getElementById('inputNumEn');
+    const inputCharAr = document.getElementById('inputCharAr');
+    const inputCharEn = document.getElementById('inputCharEn');
+
+    // Force LTR direction for correct alignment
+    if(inputNumAr) {
+        inputNumAr.style.setProperty('direction', 'ltr', 'important');
+        inputNumAr.style.setProperty('unicode-bidi', 'bidi-override', 'important');
+    }
+    if(inputNumEn) {
+        inputNumEn.style.setProperty('direction', 'ltr', 'important');
+        inputNumEn.style.setProperty('unicode-bidi', 'bidi-override', 'important');
+    }
+
+    if(inputNumAr) {
+        inputNumAr.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\s/g, '');
+            let enVal = '', filteredArVal = '';
+            for (let char of val) {
+                if (numMapEn[char]) { enVal += numMapEn[char]; filteredArVal += char; }
+                else if (char >= '0' && char <= '9') { enVal += char; filteredArVal += numMapAr[char]; }
+            }
+            inputNumAr.value = filteredArVal.split('').join(' ').trim();
+            inputNumEn.value = enVal.split('').join(' ').trim();
+        });
+    }
+
+    if(inputNumEn) {
+        inputNumEn.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\s/g, '');
+            let arVal = '', filteredEnVal = '';
+            for (let char of val) {
+                if (char >= '0' && char <= '9') { arVal += numMapAr[char]; filteredEnVal += char; }
+                else if (numMapEn[char]) { arVal += char; filteredEnVal += numMapEn[char]; }
+            }
+            inputNumEn.value = filteredEnVal.split('').join(' ').trim();
+            inputNumAr.value = arVal.split('').join(' ').trim();
+        });
+    }
+
+    if(inputCharAr) {
+        inputCharAr.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\s/g, '');
+            let filteredAr = '', enVal = '';
+            for (let char of val) {
+                if (char === 'ا') char = 'أ';
+                if (validArabicChars.includes(char)) { 
+                    filteredAr += char; 
+                    enVal = charMapArToEn[char] + enVal; 
+                }
+            }
+            inputCharAr.value = filteredAr.split('').join(' ').trim();
+            inputCharEn.value = enVal.split('').join(' ').trim();
+        });
+    }
+
+    if(inputCharEn) {
+        inputCharEn.addEventListener('input', (e) => {
+            let val = e.target.value.toUpperCase().replace(/\s/g, '');
+            let filteredEn = '', arVal = '';
+            for (let char of val) {
+                if (validEnglishChars.includes(char)) { 
+                    filteredEn += char; 
+                    arVal = charMapEnToAr[char] + arVal; 
+                }
+            }
+            inputCharEn.value = filteredEn.split('').join(' ').trim();
+            inputCharAr.value = arVal.split('').join(' ').trim();
+        });
+    }
+}
+
+// ==========================================
+// 4. Map Functions
+// ==========================================
+
 function initMap() {
     const mapElement = document.getElementById('map');
     if (!mapElement) return;
 
-    // إعداد الخريطة ومركزها (الرياض)
+    // Center on Riyadh
     map = L.map('map', {zoomControl: false}).setView([24.7136, 46.6753], 11);
     
-    // إضافة طبقة الخريطة (CartoDB Voyager)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OSM', maxZoom: 19
     }).addTo(map);
 
-    // تحديث عداد الكاميرات في الواجهة
     const camCountEl = document.getElementById('camCount');
     if(camCountEl) camCountEl.innerText = cameras.length;
 
-    // إضافة الدبابيس (Markers) لكل كاميرا
+    // Add Grey Dots for Cameras
     cameras.forEach(cam => {
         const fixedIcon = L.divIcon({
             className: '',
-            html: `<div class="pin-inner"></div>`, // استخدام CSS المخصص للدبوس
-            iconSize: [20, 20],
-            iconAnchor: [10, 10],
-            tooltipAnchor: [0, -12]
+            html: `<div class="pin-inner" style="background-color: #999; border-color: #fff;"></div>`,
+            iconSize: [12, 12], 
+            iconAnchor: [6, 6],
+            tooltipAnchor: [0, -10]
         });
 
         const marker = L.marker(cam.coords, { icon: fixedIcon }).addTo(map);
         marker.bindTooltip(cam.name, { direction: 'top' });
         
-        // عند الضغط على الكاميرا يتم تحديدها كنقطة في المسار
+        // Manual click handler (optional usage)
         marker.on('click', () => handleCameraClick(cam.coords, cam.name));
     });
 }
 
-// دالة معالجة الضغط على الكاميرا
 function handleCameraClick(coords, name) {
     const statusBox = document.getElementById('statusBox');
     const resetBtn = document.getElementById('resetBtn');
     const latlng = L.latLng(coords);
     selectedWaypoints.push(latlng);
     
-    // منطق تحديث نص الحالة
     if (selectedWaypoints.length === 1) {
         if(statusBox) {
             statusBox.innerHTML = `البداية: <b>${name}</b><br>أكمل اختيار نقاط المسار...`;
@@ -217,27 +194,39 @@ function handleCameraClick(coords, name) {
             statusBox.innerHTML = `تم إضافة: <b>${name}</b><br>إجمالي النقاط: ${selectedWaypoints.length}`;
             statusBox.style.color = "black";
         }
-        drawRoute(selectedWaypoints); // رسم الخط بين النقاط
-        if(resetBtn) resetBtn.style.display = 'block'; // إظهار زر المسح
+        drawRoute(selectedWaypoints);
+        if(resetBtn) resetBtn.style.display = 'block';
     }
 }
 
-// دالة رسم المسار باستخدام Leaflet Routing Machine
 function drawRoute(waypoints) {
     if (routingControl) map.removeControl(routingControl);
+    
+    // Custom Markers for Start/End of the path
+    const plan = L.Routing.plan(waypoints, {
+        createMarker: function(i, wp) {
+            return L.marker(wp.latLng, {
+                icon: L.divIcon({
+                    className: '',
+                    html: `<div class="pin-inner" style="background-color: #014B32; transform: scale(1.2);"></div>`,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                })
+            });
+        }
+    });
+
     routingControl = L.Routing.control({
-        waypoints: waypoints,
+        plan: plan,
         routeWhileDragging: false,
         addWaypoints: false,
         draggableWaypoints: false,
         fitSelectedRoutes: true,
         show: false,
-        lineOptions: { styles: [{color: '#014B32', opacity: 0.8, weight: 6}] }, // لون الخط أخضر
-        createMarker: function() { return null; } // عدم إنشاء دبابيس إضافية
+        lineOptions: { styles: [{color: '#014B32', opacity: 0.8, weight: 6}] }
     }).addTo(map);
 }
 
-// دالة مسح المسار وإعادة تعيين الخريطة
 window.resetMap = function() {
     selectedWaypoints = [];
     if (routingControl && map) {
@@ -246,6 +235,11 @@ window.resetMap = function() {
     }
     const statusBox = document.getElementById('statusBox');
     const resetBtn = document.getElementById('resetBtn');
+    
+    // Clear Sidebar Log
+    const container = document.getElementById('movementLogContainer');
+    if(container) container.innerHTML = '<p class="text-gray-400 text-sm p-4">قم بالبحث لعرض السجل...</p>';
+
     if(statusBox) {
         statusBox.innerHTML = "حدد نقطة البداية للمركبة...";
         statusBox.style.color = "#333";
@@ -255,8 +249,7 @@ window.resetMap = function() {
 };
 
 // ==========================================
-// PART 3: Search Simulation Logic
-// منطق محاكاة البحث
+// 5. SEARCH & API LOGIC (UPDATED)
 // ==========================================
 
 window.performSearch = function() {
@@ -267,10 +260,12 @@ window.performSearch = function() {
     const inputNumEn = document.getElementById('inputNumEn');
     const inputCharEn = document.getElementById('inputCharEn');
     
-    const numVal = inputNumEn ? inputNumEn.value : '';
-    const charVal = inputCharEn ? inputCharEn.value : '';
+    // 1. Prepare Data
+    const numVal = inputNumEn ? inputNumEn.value.replace(/\s/g, '') : '';
+    const charVal = inputCharEn ? inputCharEn.value.replace(/\s/g, '') : '';
+    const fullPlate = numVal + charVal; 
 
-    // التحقق من أن الحقول ليست فارغة
+    // 2. Validation
     if (numVal.trim() === '' && charVal.trim() === '') {
         if(validationMessage) {
             validationMessage.textContent = 'الرجاء إدخال رقم اللوحة أو الأحرف';
@@ -281,58 +276,98 @@ window.performSearch = function() {
     }
     if(validationMessage) validationMessage.classList.add('hidden');
 
-    // عرض رقم اللوحة في صفحة النتائج
+    // 3. Update Display (Fix for 506 format)
     const displayEl = document.getElementById('resultPlateDisplay');
-    if(displayEl) displayEl.innerText = (numVal + " " + charVal).trim();
+    if(displayEl) {
+        displayEl.innerText = (numVal + " " + charVal).trim();
+        displayEl.style.direction = 'ltr'; 
+        displayEl.style.unicodeBidi = 'embed';
+    }
 
-    // تغيير أيقونة الزر لتدل على التحميل
+    // 4. Loading State
     const originalContent = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-2xl"></i>';
     btn.disabled = true;
-    
-    // محاكاة تأخير الشبكة (Loading)
-    setTimeout(() => {
-        searchSection.classList.add('hidden-section');
-        resultsSection.classList.remove('hidden-section');
-        requestAnimationFrame(() => {
-            resultsSection.classList.remove('opacity-0');
-            resultsSection.classList.add('fade-in-up');
-        });
-        btn.innerHTML = originalContent;
-        btn.disabled = false;
-        
-        // تحديث حجم الخريطة ورسم مسار وهمي للتجربة
-        if(map) {
-            map.invalidateSize();
-            setTimeout(() => {
-                map.invalidateSize();
-                // إحداثيات وهمية للمسار (حي الصحافة -> حي الملقا -> حي الربيع)
-                const hafaCoords = [24.7963, 46.6385]; 
-                const malqaCoords = [24.8105, 46.6112]; 
-                const rabieCoords = [24.7912, 46.6734]; 
 
-                const simulatedRoute = [L.latLng(hafaCoords), L.latLng(malqaCoords), L.latLng(rabieCoords)];
-                selectedWaypoints = simulatedRoute;
-                
-                const statusBox = document.getElementById('statusBox');
-                const resetBtn = document.getElementById('resetBtn');
-                if(statusBox) {
-                    statusBox.innerHTML = `تم رصد مسار المركبة<br>عدد النقاط: 3`;
-                    statusBox.style.color = "#014B32";
+    // 5. CALL THE REAL API (FETCH)
+    fetch(`/api/check_plate/${fullPlate}`)
+        .then(response => response.json())
+        .then(data => {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+
+            if (data.found) {
+                // Show Results
+                searchSection.classList.add('hidden-section');
+                resultsSection.classList.remove('hidden-section');
+                requestAnimationFrame(() => {
+                    resultsSection.classList.remove('opacity-0');
+                    resultsSection.classList.add('fade-in-up');
+                });
+
+                // Update Map
+                if(map) {
+                    map.invalidateSize();
+                    setTimeout(() => {
+                        map.invalidateSize();
+                        
+                        // 1. Draw Route from DB path
+                        const dbRoute = data.data.path.map(coord => L.latLng(coord[0], coord[1]));
+                        selectedWaypoints = dbRoute; // Sync for manual usage if needed
+                        drawRoute(dbRoute);
+
+                        // 2. Render Sidebar History
+                        renderHistoryLog(data.data.history);
+
+                        // 3. Update Status Box
+                        const statusBox = document.getElementById('statusBox');
+                        const resetBtn = document.getElementById('resetBtn');
+                        
+                        if(statusBox) {
+                            statusBox.innerHTML = `
+                                المالك: <b>${data.data.owner}</b><br>
+                                الحالة: <span class="${data.data.status === 'stolen' ? 'text-red-600' : 'text-green-600'} font-bold">
+                                ${data.data.status === 'stolen' ? 'مسروقة' : 'نشطة'}
+                                </span><br>
+                                تم رصد المسار (${dbRoute.length} نقاط)
+                            `;
+                            statusBox.style.color = "#333";
+                        }
+                        if(resetBtn) resetBtn.style.display = 'block';
+
+                        // Zoom to path
+                        const bounds = L.latLngBounds(dbRoute);
+                        map.fitBounds(bounds, { padding: [50, 50] });
+
+                    }, 400);
                 }
-                if(resetBtn) resetBtn.style.display = 'block';
-                drawRoute(simulatedRoute);
-            }, 300);
-        }
-    }, 800);
+
+            } else {
+                // Not Found Alert
+                if(typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'لم يتم العثور على المركبة',
+                        text: 'تأكد من رقم اللوحة (جرب 9090 RBX)',
+                        confirmButtonColor: '#014B32'
+                    });
+                } else {
+                    alert('لم يتم العثور على المركبة.\nجرب لوحة: 9090 RBX');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+            alert("حدث خطأ في الاتصال بالنظام");
+        });
 };
 
-// دالة العودة للبحث الجديد
 window.resetSearch = function() {
     const searchSection = document.getElementById('searchSection');
     const resultsSection = document.getElementById('resultsSection');
     
-    // إخفاء النتائج وإظهار البحث
     resultsSection.classList.add('opacity-0');
     setTimeout(() => {
         resultsSection.classList.add('hidden-section');
@@ -347,7 +382,61 @@ window.resetSearch = function() {
     }, 300);
 };
 
-// دوال التحكم في نافذة عرض الصورة
+// ==========================================
+// 6. Sidebar & Reports Logic
+// ==========================================
+
+// New Function to render the dynamic history list
+function renderHistoryLog(historyData) {
+    const container = document.getElementById('movementLogContainer');
+    if (!container) return;
+
+    container.innerHTML = ''; // Clear previous
+
+    if(!historyData || historyData.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 mt-4">لا توجد بيانات سجل.</p>';
+        return;
+    }
+
+    historyData.forEach((item, index) => {
+        const isFirst = index === 0;
+        
+        // Styles
+        const dotStyle = isFirst 
+            ? 'w-5 h-5 bg-ksaGreen border-4 border-white shadow -right-[41px]' 
+            : 'w-4 h-4 bg-gray-300 border-2 border-white top-1 -right-[39px]';
+            
+        const cardStyle = isFirst
+            ? 'p-4 bg-green-50 rounded-xl border border-green-100'
+            : 'py-1 hover:bg-gray-50 rounded-lg px-2';
+
+        const textTitle = isFirst ? 'text-gray-800' : 'text-gray-600';
+        const iconBtn = isFirst
+            ? 'w-8 h-8 text-ksaGreen bg-white border-green-200 hover:bg-ksaGreen hover:text-white'
+            : 'w-7 h-7 text-gray-400 border-gray-200 hover:bg-ksaGreen hover:text-white hover:border-ksaGreen';
+
+        const itemHTML = `
+            <div class="relative mr-8 group transition-all duration-500 fade-in-up" style="animation-delay: ${index * 0.1}s">
+                <span class="absolute ${dotStyle} rounded-full z-10"></span>
+                <div class="${cardStyle} flex justify-between items-center transition-colors">
+                    <div>
+                        <p class="font-bold ${textTitle}">${item.name}</p>
+                        <p class="text-xs text-gray-500 mt-1 flex gap-2">
+                            <span>${item.date}</span>
+                            <span>${item.time}</span>
+                        </p>
+                    </div>
+                    <button onclick="showImage()" class="${iconBtn} rounded-full border flex items-center justify-center transition-all shadow-sm">
+                        <i class="fa-regular fa-eye ${isFirst ? '' : 'text-xs'}"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML += itemHTML;
+    });
+}
+
 window.showImage = function() {
     const modal = document.getElementById('imageModal');
     if(!modal) return;
@@ -374,14 +463,8 @@ window.closeImage = function() {
     }, 300);
 }
 
-// ==========================================
-// PART 4: Navigation & Reports Logic
-// منطق التنقل والبلاغات
-// ==========================================
-
-// دالة التبديل بين التبويبات (تتبع / بلاغات)
+// دالة التبديل بين التبويبات
 window.switchTab = function(tabName) {
-    // 1. تحديث شكل الأزرار في القائمة
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
         item.classList.remove('bg-ksaGreen', 'text-white'); 
@@ -394,7 +477,6 @@ window.switchTab = function(tabName) {
         activeBtn.classList.remove('text-gray-600', 'hover:bg-green-50');
     }
 
-    // 2. إظهار وإخفاء الأقسام (Views)
     const viewTracking = document.getElementById('view-tracking');
     const viewReports = document.getElementById('view-reports');
 
@@ -402,7 +484,7 @@ window.switchTab = function(tabName) {
         viewReports.classList.add('hidden');
         viewTracking.classList.remove('hidden');
         requestAnimationFrame(() => {
-            if(map) map.invalidateSize(); // إصلاح مشكلة عدم ظهور الخريطة عند العودة
+            if(map) map.invalidateSize();
         });
     } else if (tabName === 'reports') {
         viewTracking.classList.add('hidden');
@@ -410,22 +492,20 @@ window.switchTab = function(tabName) {
     }
 };
 
-// بيانات وهمية للبلاغات
+// بيانات وهمية للبلاغات (Using your provided list)
 const stolenCarsData = [
     { id: 9822, plateNum: "9090", plateChar: "R B X", type: "سرقة", date: "منذ ساعتين", location: "الرياض - حي العقيق", status: "نشط", statusColor: "red" },
     { id: 4511, plateNum: "1234", plateChar: "A B D", type: "اشتباه", date: "منذ 5 ساعات", location: "الرياض - حي الملز", status: "تحت المعالجة", statusColor: "orange" },
     { id: 3321, plateNum: "5561", plateChar: "K S A", type: "سرقة", date: "أمس", location: "جدة - الحمراء", status: "نشط", statusColor: "red" },
     { id: 7782, plateNum: "6600", plateChar: "L E D", type: "لوحة مفقودة", date: "قبل يومين", location: "الدمام - الشاطئ", status: "مغلق", statusColor: "gray" },
     { id: 1122, plateNum: "8888", plateChar: "H H H", type: "سرقة", date: "قبل 3 أيام", location: "الرياض - الصحافة", status: "نشط", statusColor: "red" },
-    { id: 5543, plateNum: "2020", plateChar: "M S S", type: "اشتباه", date: "قبل أسبوع", location: "مكة - العزيزية", status: "مغلق", statusColor: "gray" },
+    { id: 5543, plateNum: "2020", plateChar: "N S S", type: "اشتباه", date: "قبل أسبوع", location: "مكة - العزيزية", status: "مغلق", statusColor: "gray" },
 ];
 
-// دالة إنشاء بطاقات البلاغات وتعبئتها في الصفحة
 window.renderReports = function() {
     const grid = document.getElementById('reports-grid');
     if(!grid) return;
 
-    // استخدام map لتحويل البيانات إلى كود HTML
     grid.innerHTML = stolenCarsData.map(car => `
         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col">
             <div class="flex justify-between items-start mb-4">
@@ -442,7 +522,6 @@ window.renderReports = function() {
                     ${car.status}
                 </span>
             </div>
-
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 flex flex-row-reverse justify-between items-center mb-4">
                 <div class="text-lg font-bold text-gray-800 font-mono">${car.plateNum}</div>
                 <div class="h-6 w-[1px] bg-gray-300"></div>
@@ -452,7 +531,6 @@ window.renderReports = function() {
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Flag_of_Saudi_Arabia.svg/800px-Flag_of_Saudi_Arabia.svg.png" class="w-3 opacity-80">
                 </div>
             </div>
-
             <div class="mt-auto pt-3 border-t border-gray-100 flex justify-between items-center">
                 <div class="flex items-center gap-1 text-gray-500 text-xs">
                     <i class="fa-solid fa-location-dot"></i>
