@@ -496,7 +496,7 @@ window.switchTab = function(tabName) {
 const stolenCarsData = [
     { id: 9822, plateNum: "9090", plateChar: "R B X", type: "سرقة", date: "منذ ساعتين", location: "الرياض - حي العقيق", status: "نشط", statusColor: "red" },
     { id: 4511, plateNum: "1234", plateChar: "A B D", type: "اشتباه", date: "منذ 5 ساعات", location: "الرياض - حي الملز", status: "تحت المعالجة", statusColor: "orange" },
-    { id: 3321, plateNum: "5561", plateChar: "K S A", type: "سرقة", date: "أمس", location: "جدة - الحمراء", status: "نشط", statusColor: "red" },
+    { id: 3321, plateNum: "2030", plateChar: "K S A", type: "سرقة", date: "أمس", location: "الرياض - الصحافة", status: "نشط", statusColor: "red" },
     { id: 7782, plateNum: "6600", plateChar: "L E D", type: "لوحة مفقودة", date: "قبل يومين", location: "الدمام - الشاطئ", status: "مغلق", statusColor: "gray" },
     { id: 1122, plateNum: "8888", plateChar: "H H H", type: "سرقة", date: "قبل 3 أيام", location: "الرياض - الصحافة", status: "نشط", statusColor: "red" },
     { id: 5543, plateNum: "2020", plateChar: "N S S", type: "اشتباه", date: "قبل أسبوع", location: "مكة - العزيزية", status: "مغلق", statusColor: "gray" },

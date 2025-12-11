@@ -45,11 +45,11 @@ def init_db():
         },
         # 3. 5561 KSA (Stolen - Jeddah/Hamra) - Mapped to Riyadh Hamra for demo
         {
-            "plate_clean": "5561KSA", "plate_display": "5561 KSA", "owner": "Sami Al-Jaber", "status": "stolen",
+            "plate_clean": "2030KSA", "plate_display": "2030 KSA", "owner": "Ahmed Al-Jaber", "status": "stolen",
             "history": [
-                {"name": "حي الحمراء", "coords": COORDS["Hamra"], "time": "04:30 م", "date": "أمس"},
-                {"name": "حي القدس", "coords": COORDS["Quds"], "time": "04:00 م", "date": "أمس"},
-                {"name": "حي الروضة", "coords": COORDS["Rawdah"], "time": "03:45 م", "date": "أمس"}
+                {"name": "حي العزيزية", "coords": COORDS["Aziziyah"], "time": "09:45 م", "date": "اليوم"},
+                {"name": "حي العليا", "coords": COORDS["Olaya"], "time": "01:00 م", "date": "اليوم"},
+                {"name": "حي الصحافة", "coords": COORDS["Sahafa"], "time": "09:30 م", "date": "اليوم"}               
             ]
         },
         # 4. 6600 LED (Closed - Dammam) - Mapped to Qurtubah for demo
