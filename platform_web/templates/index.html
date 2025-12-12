@@ -2,74 +2,64 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>بوابة تتبع المركبات | الخدمات الوطنية</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script src="{{ url_for('static', filename='js/tailwind.config.js') }}"></script>
 
     <style>
-        /* تحديد ارتفاع الخريطة وتدوير الحواف */
         #map { height: 100%; width: 100%; z-index: 1; border-radius: 1rem; }
-        
-        /* تصميم الدبوس (Pin) المخصص على الخريطة */
         .pin-inner {
             background-color: #014B32; border: 3px solid white; border-radius: 50%;
             width: 100%; height: 100%; box-sizing: border-box;
             box-shadow: 0 3px 8px rgba(0,0,0,0.4); transition: transform 0.2s;
         }
-        /* تكبير الدبوس عند مرور الماوس */
         .pin-inner:hover { transform: scale(1.2); background-color: #016C48; cursor: pointer; }
-
-        /* لوحة التحكم العائمة فوق الخريطة */
+        
+        /* Mobile Map Controls */
         .control-panel {
-            position: absolute; top: 20px; right: 20px;
-            background: white; padding: 15px; border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1000; width: 250px;
+            position: absolute; top: 10px; right: 10px; left: 10px;
+            background: white; padding: 10px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1000; width: auto;
             border-right: 4px solid #014B32;
         }
-        .status-box { background: #f3f4f6; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 13px; }
-        
-        /* زر مسح المسار */
-        .btn-reset {
-            width: 100%; padding: 8px; background: #374151; color: white;
-            border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;
-            display: none; font-size: 0.9rem;
+        @media (min-width: 768px) {
+            .control-panel { width: 250px; left: auto; top: 20px; right: 20px; }
         }
-        .btn-reset:hover { background: #1f2937; }
         
-        /* إخفاء لوحة التوجيه الافتراضية الخاصة بـ Leaflet */
+        .status-box { background: #f3f4f6; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 13px; }
         .leaflet-routing-container { display: none !important; }
+        .nav-item.active { background-color: #014B32; color: white; }
 
-        /* تنسيق الزر النشط في القائمة الجانبية */
-        .nav-item.active {
-            background-color: #014B32;
-            color: white;
+        /* Mobile Overlay for Sidebar */
+        #mobile-overlay {
+            transition: opacity 0.3s ease-in-out;
         }
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 flex flex-col h-screen overflow-hidden">
 
-    <header class="bg-white border-b border-gray-200 h-20 shadow-sm flex-shrink-0 z-50">
+    <header class="bg-white border-b border-gray-200 h-16 md:h-20 shadow-sm flex-shrink-0 z-50">
         <div class="container mx-auto px-4 h-full flex items-center justify-between">
-            <div class="flex items-center gap-8 h-full">
-                <div class="flex items-center gap-3 border-l pl-6 border-gray-200 h-12 cursor-pointer" onclick="location.reload()">
+            <div class="flex items-center gap-4 h-full">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-600 text-2xl p-2 hover:bg-gray-100 rounded-lg">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <div class="flex items-center gap-3 border-l pl-4 md:pl-6 border-gray-200 h-10 md:h-12 cursor-pointer" onclick="location.reload()">
                     <div class="flex flex-col items-end">
-                        <h1 class="text-lg font-bold text-gray-800 leading-none">بوابة تتبع المركبات</h1>
+                        <h1 class="text-base md:text-lg font-bold text-gray-800 leading-none">بوابة تتبع المركبات</h1>
                     </div>
-                    <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" class="md:w-[50px] md:h-[50px]">
                         <path d="M10 50 C30 20 70 20 90 50 C70 80 30 80 10 50 Z" fill="white" stroke="#014B32" stroke-width="3"/>
                         <circle cx="50" cy="50" r="15" fill="#014B32"/>
                         <circle cx="58" cy="42" r="5" fill="white" opacity="0.7"/>
@@ -78,28 +68,35 @@
             </div>
             <div class="flex items-center gap-4">
                 <button class="flex items-center gap-2 text-gray-700 font-bold text-sm hover:text-ksaGreen px-2">
-                    <span>English</span>
+                    <span class="hidden md:inline">English</span>
                     <i class="fa-solid fa-globe text-lg"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden relative">
         
-        <aside class="w-64 bg-white border-l border-gray-200 flex flex-col pt-6 pb-6 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40">
+        <div id="mobile-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden opacity-0 md:hidden"></div>
+
+        <aside id="main-sidebar" class="fixed inset-y-0 right-0 w-64 bg-white border-l border-gray-200 flex flex-col pt-20 md:pt-6 pb-6 shadow-2xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40 transform translate-x-full transition-transform duration-300 md:translate-x-0 md:static md:w-64">
+            
+            <button onclick="toggleSidebar()" class="absolute top-4 left-4 md:hidden text-gray-400 hover:text-red-500">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+
             <div class="px-6 mb-8">
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">القائمة الرئيسية</p>
             </div>
             
             <nav class="flex-1 space-y-2 px-3">
-                <button onclick="switchTab('tracking')" id="nav-tracking" class="nav-item active w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-green-50 hover:text-ksaGreen transition-all duration-200 group">
+                <button onclick="switchTab('tracking'); toggleSidebar()" id="nav-tracking" class="nav-item active w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-green-50 hover:text-ksaGreen transition-all duration-200 group">
                     <div class="icon-box w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-green-100 flex items-center justify-center transition-colors">
                         <i class="fa-solid fa-car text-lg"></i> </div>
                     <span class="font-bold">تتبع مركبة</span>
                 </button>
 
-                <button onclick="switchTab('reports')" id="nav-reports" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-green-50 hover:text-ksaGreen transition-all duration-200 group">
+                <button onclick="switchTab('reports'); toggleSidebar()" id="nav-reports" class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-xl text-gray-600 hover:bg-green-50 hover:text-ksaGreen transition-all duration-200 group">
                     <div class="icon-box w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-green-100 flex items-center justify-center transition-colors">
                         <i class="fa-solid fa-file-shield text-lg"></i>
                     </div>
@@ -111,9 +108,7 @@
             <div class="px-6 mt-auto">
                 <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-ksaGreen text-white flex items-center justify-center font-bold">
-                            ع
-                        </div>
+                        <div class="w-10 h-10 rounded-full bg-ksaGreen text-white flex items-center justify-center font-bold">ع</div>
                         <div>
                             <p class="text-sm font-bold text-gray-800">عبدالله محمد</p>
                             <p class="text-xs text-gray-500">مشرف عمليات</p>
@@ -123,51 +118,52 @@
             </div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto bg-[#F7F9FC] relative p-8">
+        <main class="flex-1 overflow-y-auto bg-[#F7F9FC] relative p-4 md:p-8 w-full">
             
             <div id="view-tracking" class="max-w-7xl mx-auto min-h-full flex flex-col">
-                <section id="searchSection" class="max-w-5xl mx-auto w-full transition-all duration-700 mt-8">
-                    <div class="text-center mb-12 fade-in-up">
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">تتبع المركبات</h2>
-                        <p class="text-gray-500">أدخل رقم اللوحة أدناه لتتبع المركبة</p>
+                <section id="searchSection" class="max-w-5xl mx-auto w-full transition-all duration-700 mt-4 md:mt-8">
+                    <div class="text-center mb-8 fade-in-up">
+                        <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-2">تتبع المركبات</h2>
+                        <p class="text-sm md:text-base text-gray-500">أدخل رقم اللوحة أدناه لتتبع المركبة</p>
                         <div id="validationMessage" class="mt-4 text-red-600 font-bold hidden">
                             الرجاء إدخال رقم اللوحة أو الأحرف
                         </div>
                     </div>
         
-                    <div class="bg-white p-8 md:p-12 rounded-3xl shadow-plate border border-gray-100 fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="bg-white p-5 md:p-12 rounded-3xl shadow-plate border border-gray-100 fade-in-up" style="animation-delay: 0.1s;">
                         <div class="flex flex-col items-center w-full">
                             <div class="w-full max-w-[500px] relative">
                                 <div class="flex justify-between mb-3 px-2">
                                     <span class="text-sm font-bold text-gray-400">أكتب بيانات اللوحة</span>
                                 </div>
-                                <div class="flex flex-row-reverse border-[4px] border-black rounded-xl overflow-hidden h-36 bg-white shadow-lg transform hover:scale-[1.01] transition duration-300">
-                                    <div class="flex-1 border-r-[4px] border-black flex flex-col">
+                                <div class="flex flex-row-reverse border-[3px] md:border-[4px] border-black rounded-xl overflow-hidden h-28 md:h-36 bg-white shadow-lg">
+                                    <div class="flex-1 border-r-[3px] md:border-r-[4px] border-black flex flex-col">
                                         <div class="h-1/2 border-b-[2px] border-black/10 flex items-center justify-center bg-gray-50/50 relative">
-                                            <input type="text" id="inputNumAr" class="plate-input plate-text-ar text-gray-800 text-lg" placeholder="١ ٢ ٣ ٤" maxlength="6">
+                                            <input type="text" id="inputNumAr" class="plate-input plate-text-ar text-gray-800" placeholder="١ ٢ ٣ ٤" maxlength="6">
                                         </div>
                                         <div class="h-1/2 flex items-center justify-center bg-white relative">
-                                            <input type="text" id="inputNumEn" class="plate-input plate-text-en text-gray-800 text-lg uppercase" placeholder="1 2 3 4" maxlength="6">
+                                            <input type="text" id="inputNumEn" class="plate-input plate-text-en text-gray-800 uppercase" placeholder="1 2 3 4" maxlength="6">
                                         </div>
                                     </div>
-                                    <div class="w-20 border-r-[4px] border-black flex flex-col items-center justify-between py-8 bg-white">
-                                        <span class="text-sm font-extrabold text-black tracking-widest">السعودية</span>
-                                        <div class="w-14 h-14 text-ksaGreen flex items-center justify-center"></div>
-                                        <span class="text-sm font-extrabold text-black transform rotate-90 whitespace-nowrap tracking-[8px] mb-1">KSA</span>
+                                    <div class="w-16 md:w-20 border-r-[3px] md:border-r-[4px] border-black flex flex-col items-center justify-between py-4 md:py-8 bg-white">
+                                        <span class="text-[10px] md:text-sm font-extrabold text-black tracking-widest">السعودية</span>
+                                        <div class="w-10 h-10 md:w-14 md:h-14 text-ksaGreen flex items-center justify-center">
+                                        </div>
+                                        <span class="text-[10px] md:text-sm font-extrabold text-black transform rotate-90 whitespace-nowrap tracking-[4px] md:tracking-[8px] mb-1">KSA</span>
                                     </div>
                                     <div class="flex-1 flex flex-col">
                                         <div class="h-1/2 border-b-[2px] border-black/10 flex items-center justify-center bg-gray-50/50 relative">
-                                            <input type="text" id="inputCharAr" class="plate-input plate-text-ar text-gray-800 text-lg" placeholder="أ ب د" maxlength="4">
+                                            <input type="text" id="inputCharAr" class="plate-input plate-text-ar text-gray-800" placeholder="أ ب د" maxlength="4">
                                         </div>
                                         <div class="h-1/2 flex items-center justify-center bg-white relative">
-                                            <input type="text" id="inputCharEn" class="plate-input plate-text-en text-gray-800 text-lg uppercase" placeholder="A B D" maxlength="4">
+                                            <input type="text" id="inputCharEn" class="plate-input plate-text-en text-gray-800 uppercase" placeholder="A B D" maxlength="4">
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="w-full max-w-[500px] mt-8">
-                                <button onclick="performSearch()" class="w-full h-16 rounded-xl bg-ksaGreen text-white font-bold text-xl shadow-lg hover:bg-ksaGreen-light transition-all flex items-center justify-center gap-3">
-                                    <i class="fa-solid fa-magnifying-glass text-2xl"></i>
+                                <button onclick="performSearch()" class="w-full h-14 md:h-16 rounded-xl bg-ksaGreen text-white font-bold text-lg md:text-xl shadow-lg hover:bg-ksaGreen-light transition-all flex items-center justify-center gap-3 active:scale-95">
+                                    <i class="fa-solid fa-magnifying-glass text-xl md:text-2xl"></i>
                                     <span>بحث</span>
                                 </button>
                             </div>
@@ -175,77 +171,101 @@
                     </div>
                 </section>
         
-                <section id="resultsSection" class="hidden-section opacity-0 transition-opacity duration-700 mt-6 w-full">
-                    <div class="flex items-center justify-between mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                <section id="resultsSection" class="hidden-section opacity-0 transition-opacity duration-700 mt-4 w-full pb-10">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100 gap-4">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-ksaGreen">
-                                <i class="fa-solid fa-car text-xl"></i>
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-green-50 rounded-full flex items-center justify-center text-ksaGreen flex-shrink-0">
+                                <i class="fa-solid fa-car text-lg md:text-xl"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold text-gray-800">نتائج التتبع</h3>
-                                <p class="text-sm text-gray-500">رقم اللوحة: <span id="resultPlateDisplay" class="font-mono font-bold text-black">1234 ABD</span></p>
+                                <h3 class="text-lg md:text-xl font-bold text-gray-800">نتائج التتبع</h3>
+                                <p class="text-sm text-gray-500">رقم اللوحة: <span id="resultPlateDisplay" class="font-mono font-bold text-black"></span></p>
                             </div>
                         </div>
-                        <button onclick="resetSearch()" class="px-4 py-2 text-sm font-bold text-gray-500 bg-gray-50 rounded hover:bg-gray-100 hover:text-ksaGreen transition">
+                        <button onclick="resetSearch()" class="w-full md:w-auto px-4 py-3 md:py-2 text-sm font-bold text-gray-500 bg-gray-50 rounded hover:bg-gray-100 hover:text-ksaGreen transition text-center">
                             <i class="fa-solid fa-rotate-right ml-1"></i> بحث جديد
                         </button>
                     </div>
         
-                    <div class="grid lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 h-[500px] relative">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 h-[50vh] md:h-[500px] relative order-1">
                             <div class="control-panel">
-                                <h3 class="font-bold text-gray-800 mb-1">نظام المراقبة الحية</h3>
-                                <div style="font-size:12px; color:#666; margin-bottom:5px;">كاميرات نشطة: <b id="camCount">0</b></div>
+                                <h3 class="font-bold text-gray-800 mb-1 text-sm md:text-base">نظام المراقبة الحية</h3>
+                                <div style="font-size:11px; color:#666; margin-bottom:5px;">كاميرات نشطة: <b id="camCount">0</b></div>
                                 <div id="statusBox" class="status-box">حدد نقطة البداية للمركبة...</div>
-                                <button id="resetBtn" class="btn-reset" onclick="resetMap()">مسح المسار</button>
                             </div>
                             <div id="map"></div>
                         </div>
         
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-[500px] overflow-y-auto">
-                            <h4 class="font-bold text-gray-800 text-lg mb-6 flex items-center gap-2">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 md:p-6 h-auto md:h-[500px] overflow-y-auto order-2">
+                            <h4 class="font-bold text-gray-800 text-base md:text-lg mb-4 md:mb-6 flex items-center gap-2">
                                 <i class="fa-solid fa-list-ul text-ksaGreen"></i> سجل التحركات
                             </h4>
 
-                            <div id="movementLogContainer" class="relative border-r-2 border-gray-100 mr-2 space-y-8">
+                            <div id="movementLogContainer" class="relative border-r-2 border-gray-100 mr-2 space-y-6 md:space-y-8 pb-4">
                                 <p class="text-gray-400 text-sm p-4">قم بالبحث لعرض السجل...</p>
-                                
                             </div>
                         </div>
                     </div>
                 </section>
             </div>
 
-            <div id="view-reports" class="max-w-7xl mx-auto hidden fade-in-up">
-                <div class="flex items-center justify-between mb-8">
+            <div id="view-reports" class="max-w-7xl mx-auto hidden fade-in-up pb-10">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4 mt-4">
                     <div>
-                        <h2 class="text-3xl font-bold text-gray-800">بلاغات المركبات المسروقة</h2>
-                        <p class="text-gray-500 mt-2">قائمة بالمركبات المبلغ عن سرقتها حديثاً</p>
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800">بلاغات المركبات</h2>
+                        <p class="text-sm md:text-base text-gray-500 mt-1">قائمة بالمركبات المبلغ عن سرقتها حديثاً</p>
                     </div>
-                    <div class="bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm text-sm font-bold text-gray-600">
+                    <div class="bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm text-sm font-bold text-gray-600 self-start md:self-auto">
                         <i class="fa-solid fa-filter text-ksaGreen ml-2"></i> تصفية النتائج
                     </div>
                 </div>
 
-                <div id="reports-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="reports-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     </div>
             </div>
 
         </main>
     </div>
 
-    <div id="imageModal" class="fixed inset-0 z-[2000] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm transition-opacity opacity-0">
-        <div class="relative bg-white p-2 rounded-lg shadow-2xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
-            <button onclick="closeImage()" class="absolute -top-10 left-0 text-white hover:text-gray-300 text-3xl font-bold p-2">
+    <div id="imageModal" class="fixed inset-0 z-[3000] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+        <div class="relative bg-white p-2 rounded-lg shadow-2xl w-full max-w-md">
+            <button onclick="closeImage()" class="absolute -top-10 left-0 text-white text-3xl font-bold p-2">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <img src="https://media.discordapp.net/attachments/1330164414422188063/1448726839768907876/thumb17.jpg?ex=693c4f82&is=693afe02&hm=439715bc0a6dd12e4aed06cf3ba1986f96f13d547e7bebbaf2ee2936baf049ac&=&format=webp&width=300&height=231" class="w-full h-auto rounded-md border border-gray-200" alt="صورة الرصد">
+            <img src="https://media.discordapp.net/attachments/1330164414422188063/1448726839768907876/thumb17.jpg?ex=693c4f82&is=693afe02&hm=439715bc0a6dd12e4aed06cf3ba1986f96f13d547e7bebbaf2ee2936baf049ac&=&format=webp&width=300&height=231" class="w-full h-auto rounded-md" alt="Car">
+        </div>
+    </div>
+
+    <div id="reportDetailModal" class="fixed inset-0 z-[3000] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 transition-opacity opacity-0">
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">تفاصيل البلاغ</h3>
+                <button onclick="closeReportModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 md:p-6 max-h-[80vh] overflow-y-auto">
+                <div class="mb-6 rounded-xl overflow-hidden border border-gray-200 h-40 md:h-48 bg-gray-100 relative">
+                    <img id="modalCarImage" src="" class="w-full h-full object-cover">
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-gray-50 p-3 rounded-lg"><p class="text-xs text-gray-500">رقم اللوحة</p><p id="modalPlate" class="font-bold text-gray-800 font-mono text-lg" dir="ltr"></p></div>
+                    <div class="bg-gray-50 p-3 rounded-lg"><p class="text-xs text-gray-500">نوع البلاغ</p><p id="modalType" class="font-bold text-red-600"></p></div>
+                    <div class="bg-gray-50 p-3 rounded-lg"><p class="text-xs text-gray-500">المالك</p><p id="modalOwner" class="font-bold text-gray-800"></p></div>
+                    <div class="bg-gray-50 p-3 rounded-lg"><p class="text-xs text-gray-500">وقت الرصد</p><p id="modalDate" class="font-bold text-gray-800"></p></div>
+                </div>
+                <div class="flex items-start gap-2 text-gray-500 text-sm bg-blue-50 p-3 rounded-lg border border-blue-100 mb-6">
+                    <i class="fa-solid fa-location-dot text-blue-500 mt-1"></i><span id="modalLocation"></span>
+                </div>
+                <div class="flex gap-3 flex-col md:flex-row">
+                    <button id="modalTrackBtn" class="flex-1 bg-ksaGreen text-white font-bold py-3 rounded-xl shadow-lg">تتبع الموقع</button>
+                    <button onclick="closeReportModal()" class="flex-none bg-gray-100 text-gray-700 font-bold py-3 px-6 rounded-xl">إغلاق</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
-    
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

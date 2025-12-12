@@ -40,6 +40,24 @@
     letter-spacing: 2px; /* تباعد بين الحروف */
 }
 
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .plate-text-ar {
+        font-size: 1.4rem;
+    }
+    .plate-text-en {
+        font-size: 1.4rem;
+        letter-spacing: 1px;
+    }
+}
+
+/* Hide scrollbar for sidebar on mobile to look cleaner */
+aside::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
 /* Animations 
    حركات الظهور (Fade In)
 */

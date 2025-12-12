@@ -18,36 +18,111 @@ for (let key in charMapArToEn) charMapEnToAr[charMapArToEn[key]] = key;
 
 // Full Camera List (Must match Python Database coordinates)
 const cameras = [
-    { name: "حي الملقا", coords: [24.8105, 46.6112] },
-    { name: "حي الصحافة", coords: [24.7963, 46.6385] },
-    { name: "حي النخيل", coords: [24.7681, 46.6318] },
-    { name: "حي الياسمين", coords: [24.8192, 46.6568] },
-    { name: "حي النرجس", coords: [24.8345, 46.6872] },
-    { name: "حي حطين", coords: [24.7648, 46.6045] },
-    { name: "حي العقيق", coords: [24.7785, 46.6231] },
-    { name: "حي الربيع", coords: [24.7912, 46.6734] },
-    { name: "حي العليا", coords: [24.6953, 46.6805] },
-    { name: "حي السليمانية", coords: [24.7011, 46.6978] },
+    // --- شمال الرياض (الصحافة، الملقا، الياسمين) ---
+    { name: "حي الملقا - التخصصي", coords: [24.8105, 46.6112] },
+    { name: "حي الصحافة - الملك فهد", coords: [24.7963, 46.6385] },
+    { name: "حي النخيل - التخصصي", coords: [24.7681, 46.6318] },
+    { name: "حي الياسمين - أنس بن مالك", coords: [24.8192, 46.6568] },
+    { name: "حي النرجس - عثمان بن عفان", coords: [24.8345, 46.6872] },
+    { name: "حي العقيق - الملك فهد", coords: [24.7785, 46.6231] },
+    { name: "حي الربيع - التخصصي", coords: [24.7912, 46.6734] },
+    { name: "حي حطين - الثغر", coords: [24.7648, 46.6045] },
+    { name: "حي القيروان", coords: [24.8502, 46.6010] },
+    { name: "حي العارض", coords: [24.8701, 46.6402] },
+    
+    // --- وسط الرياض (العليا، السليمانية، الملز) ---
+    { name: "حي العليا - موسى بن نصير", coords: [24.6953, 46.6805] },
+    { name: "حي السليمانية - التحلية", coords: [24.7011, 46.6978] },
     { name: "حي الملك عبدالعزيز", coords: [24.7214, 46.7089] },
-    { name: "حي المربع", coords: [24.6465, 46.7093] },
-    { name: "حي الملز", coords: [24.6632, 46.7382] },
+    { name: "حي المربع - الملك فيصل", coords: [24.6465, 46.7093] },
+    { name: "حي الملز - الجامعة", coords: [24.6632, 46.7382] },
     { name: "حي الوزارات", coords: [24.6558, 46.7165] },
-    { name: "حي الروضة", coords: [24.7251, 46.7654] },
+    { name: "طريق الملك فهد - الفيصلية", coords: [24.6900, 46.6850] },
+    { name: "طريق خريص - المطار القديم", coords: [24.7000, 46.7200] },
+
+    // --- شرق الرياض (الروضة، النسيم، الحمراء) ---
+    { name: "حي الروضة - الحسن بن علي", coords: [24.7251, 46.7654] },
     { name: "حي القدس", coords: [24.7432, 46.7541] },
     { name: "حي الحمراء", coords: [24.7689, 46.7582] },
-    { name: "حي قرطبة", coords: [24.8021, 46.7456] },
+    { name: "حي قرطبة - المطار", coords: [24.8021, 46.7456] },
     { name: "حي النسيم الغربي", coords: [24.7218, 46.8055] },
     { name: "حي إشبيلية", coords: [24.7854, 46.7821] },
     { name: "حي الخليج", coords: [24.7698, 46.8123] },
-    { name: "حي السويدي", coords: [24.5985, 46.6578] },
-    { name: "حي ظهرة لبن", coords: [24.6154, 46.5789] },
-    { name: "حي العريجاء", coords: [24.6234, 46.6112] },
-    { name: "حي طويق", coords: [24.5842, 46.5321] },
-    { name: "حي العزيزية", coords: [24.5823, 46.7651] },
-    { name: "حي الشفا", coords: [24.5385, 46.7082] },
+    { name: "حي النهضة", coords: [24.7500, 46.8300] },
+    { name: "حي اليرموك", coords: [24.8100, 46.7900] },
+    { name: "حي المونسية", coords: [24.8300, 46.7700] },
+    { name: "طريق الدمام - الفحص", coords: [24.8200, 46.8000] },
+
+    // --- غرب الرياض (السويدي، البديعة، لبن) ---
+    { name: "حي السويدي العام", coords: [24.5985, 46.6578] },
+    { name: "حي ظهرة لبن - المخرج", coords: [24.6154, 46.5789] },
+    { name: "حي العريجاء الوسطى", coords: [24.6234, 46.6112] },
+    { name: "حي طويق - الغروب", coords: [24.5842, 46.5321] },
+    { name: "حي الدخل المحدود", coords: [24.5900, 46.5500] },
+    { name: "حي البديعة", coords: [24.6100, 46.6300] },
+    { name: "حي الشبرا", coords: [24.5800, 46.6400] },
+    { name: "طريق جدة - القدية", coords: [24.5500, 46.5000] },
+    
+    // --- جنوب الرياض (الشفا، العزيزية، الحاير) ---
+    { name: "حي العزيزية - الدائري الجنوبي", coords: [24.5823, 46.7651] },
+    { name: "حي الشفا - المعارض", coords: [24.5385, 46.7082] },
     { name: "حي منفوحة", coords: [24.6089, 46.7235] },
     { name: "حي الدار البيضاء", coords: [24.5321, 46.7845] },
-    { name: "حي الحاير", coords: [24.4567, 46.8123] }
+    { name: "حي الحاير", coords: [24.4567, 46.8123] },
+    { name: "حي غبيراء", coords: [24.6200, 46.7400] },
+    { name: "حي الخالدية", coords: [24.6000, 46.7500] },
+    { name: "صناعية الموسى", coords: [24.5000, 46.7000] },
+
+    // --- كاميرات الطرق الرئيسية والدائري (وهمية لزيادة الكثافة) ---
+    { name: "كاميرا مخرج 1 - الشمالي", coords: [24.8200, 46.6000] },
+    { name: "كاميرا مخرج 2 - الشمالي", coords: [24.8150, 46.6200] },
+    { name: "كاميرا مخرج 4 - الشمالي", coords: [24.8000, 46.6500] },
+    { name: "كاميرا مخرج 5 - الشمالي", coords: [24.7900, 46.6700] },
+    { name: "كاميرا مخرج 6 - الشمالي", coords: [24.7850, 46.6900] },
+    { name: "كاميرا مخرج 7 - الشمالي", coords: [24.7800, 46.7100] },
+    { name: "كاميرا مخرج 8 - الدائري الشرقي", coords: [24.7700, 46.7400] },
+    { name: "كاميرا مخرج 9 - الدائري الشرقي", coords: [24.7500, 46.7500] },
+    { name: "كاميرا مخرج 10 - الدائري الشرقي", coords: [24.7300, 46.7600] },
+    { name: "كاميرا مخرج 11 - الدائري الشرقي", coords: [24.7100, 46.7700] },
+    { name: "كاميرا مخرج 12 - الدائري الشرقي", coords: [24.6900, 46.7800] },
+    { name: "كاميرا مخرج 13 - خريص", coords: [24.6800, 46.7900] },
+    { name: "كاميرا مخرج 14 - الدائري الشرقي", coords: [24.6600, 46.8000] },
+    { name: "كاميرا مخرج 15 - الدائري الشرقي", coords: [24.6400, 46.8100] },
+    { name: "كاميرا مخرج 16 - الدائري الجنوبي", coords: [24.6200, 46.8000] },
+    { name: "كاميرا مخرج 17 - الدائري الجنوبي", coords: [24.6000, 46.7800] },
+    { name: "كاميرا مخرج 18 - الدائري الجنوبي", coords: [24.5800, 46.7600] },
+    { name: "كاميرا مخرج 24 - الدائري الغربي", coords: [24.5700, 46.6500] },
+    { name: "كاميرا مخرج 25 - الدائري الغربي", coords: [24.5800, 46.6300] },
+    { name: "كاميرا مخرج 26 - الدائري الغربي", coords: [24.5900, 46.6100] },
+    { name: "كاميرا مخرج 27 - الدائري الغربي", coords: [24.6000, 46.5900] },
+    { name: "كاميرا مخرج 28 - الدائري الغربي", coords: [24.6200, 46.5800] },
+
+    // --- كاميرات إضافية عشوائية موزعة في الشوارع الداخلية ---
+    { name: "شارع التخصصي 1", coords: [24.7200, 46.6500] },
+    { name: "شارع التخصصي 2", coords: [24.7400, 46.6400] },
+    { name: "شارع التخصصي 3", coords: [24.7600, 46.6300] },
+    { name: "طريق الملك فهد 1", coords: [24.7300, 46.6600] },
+    { name: "طريق الملك فهد 2", coords: [24.7500, 46.6500] },
+    { name: "طريق الملك فهد 3", coords: [24.7700, 46.6400] },
+    { name: "طريق الملك عبدالله 1", coords: [24.7400, 46.6800] },
+    { name: "طريق الملك عبدالله 2", coords: [24.7400, 46.7000] },
+    { name: "طريق الملك عبدالله 3", coords: [24.7400, 46.7200] },
+    { name: "طريق الإمام سعود 1", coords: [24.7600, 46.6800] },
+    { name: "طريق الإمام سعود 2", coords: [24.7600, 46.7000] },
+    { name: "شارع الضباب", coords: [24.6800, 46.7000] },
+    { name: "شارع الوشم", coords: [24.6600, 46.7000] },
+    { name: "شارع الجامعة", coords: [24.6500, 46.7200] },
+    { name: "شارع البطحاء", coords: [24.6300, 46.7300] },
+    { name: "طريق الحائر", coords: [24.5500, 46.7500] },
+    { name: "طريق ديراب", coords: [24.5600, 46.6600] },
+    { name: "نقطة تفتيش القدية", coords: [24.5200, 46.4500] },
+    { name: "نقطة تفتيش الثمامة", coords: [24.9500, 46.7000] },
+    { name: "نقطة تفتيش القصيم", coords: [24.9800, 46.5500] },
+    { name: "نقطة تفتيش الدمام", coords: [24.8500, 46.9000] },
+    { name: "جامعة الملك سعود", coords: [24.7150, 46.6200] },
+    { name: "جامعة نورة", coords: [24.8450, 46.7250] },
+    { name: "المطار - الصالة 1", coords: [24.9500, 46.7800] },
+    { name: "المطار - الصالة 5", coords: [24.9600, 46.7900] }
 ];
 
 let map; 
@@ -502,10 +577,90 @@ const stolenCarsData = [
     { id: 5543, plateNum: "2020", plateChar: "N S S", type: "اشتباه", date: "قبل أسبوع", location: "مكة - العزيزية", status: "مغلق", statusColor: "gray" },
 ];
 
+
+// ==========================================
+// تحديث 2: دوال النافذة المنبثقة (Pop-up)
+// ==========================================
+
+window.openReportModal = function(id) {
+    const car = stolenCarsData.find(c => c.id === id);
+    if (!car) return;
+
+    // تعبئة البيانات في النافذة
+    document.getElementById('modalOwner').innerText = car.owner || "غير متوفر"; // نحتاج إضافة المالك للبيانات
+    document.getElementById('modalPlate').innerText = `${car.plateNum} ${car.plateChar}`;
+    document.getElementById('modalType').innerText = car.type;
+    document.getElementById('modalLocation').innerText = car.location;
+    document.getElementById('modalDate').innerText = car.date;
+    
+    // وضع صورة افتراضية أو صورة السيارة إذا وجدت
+    const imgEl = document.getElementById('modalCarImage');
+    imgEl.src = car.image || "https://th.bing.com/th/id/R.ac62990a38b8627d1e2fb43091502c74?rik=GchxtTJVQa%2bY3w&pid=ImgRaw&r=0";
+
+    // إعداد زر التتبع داخل النافذة
+    const trackBtn = document.getElementById('modalTrackBtn');
+    trackBtn.onclick = function() {
+        closeReportModal(); // إغلاق النافذة
+        quickTrack(car.plateNum, car.plateChar); // الذهاب للتتبع
+    };
+
+    // إظهار النافذة
+    const modal = document.getElementById('reportDetailModal');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        modal.firstElementChild.classList.remove('scale-95');
+        modal.firstElementChild.classList.add('scale-100');
+    }, 10);
+};
+
+window.closeReportModal = function() {
+    const modal = document.getElementById('reportDetailModal');
+    modal.classList.add('opacity-0');
+    modal.firstElementChild.classList.remove('scale-100');
+    modal.firstElementChild.classList.add('scale-95');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+};
+
+
+// ==========================================
+// تحديث 3: دالة quickTrack (للربط بين البلاغ والتتبع)
+// ==========================================
+window.quickTrack = function(plateNum, plateChar) {
+    switchTab('tracking'); // الانتقال لتبويب التتبع
+    
+    const inputNum = document.getElementById('inputNumEn');
+    const inputChar = document.getElementById('inputCharEn');
+    
+    // تعبئة البيانات
+    if(inputNum && inputChar) {
+        inputNum.value = plateNum;
+        inputChar.value = plateChar.replace(/\s/g, '');
+        
+        // تفعيل الأحداث لتحديث الحقول العربية
+        inputNum.dispatchEvent(new Event('input'));
+        inputChar.dispatchEvent(new Event('input'));
+
+        // تنفيذ البحث بعد لحظات
+        setTimeout(() => performSearch(), 500);
+    }
+};
+
+// Update the Button inside window.renderReports in script.js
+// Change the <button> line to this:
+
+// ==========================================
+// تحديث 4: تعديل renderReports لإرجاع زر التفاصيل
+// ==========================================
 window.renderReports = function() {
     const grid = document.getElementById('reports-grid');
     if(!grid) return;
 
+    // إضافة حقل 'owner' و 'image' للبيانات الوهمية لغرض العرض
+    // يمكنك تحديث stolenCarsData في الأعلى لتشمل هذه الحقول بشكل دائم
+    
     grid.innerHTML = stolenCarsData.map(car => `
         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col">
             <div class="flex justify-between items-start mb-4">
@@ -522,6 +677,7 @@ window.renderReports = function() {
                     ${car.status}
                 </span>
             </div>
+            
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-2 flex flex-row-reverse justify-between items-center mb-4">
                 <div class="text-lg font-bold text-gray-800 font-mono">${car.plateNum}</div>
                 <div class="h-6 w-[1px] bg-gray-300"></div>
@@ -531,13 +687,52 @@ window.renderReports = function() {
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Flag_of_Saudi_Arabia.svg/800px-Flag_of_Saudi_Arabia.svg.png" class="w-3 opacity-80">
                 </div>
             </div>
+
             <div class="mt-auto pt-3 border-t border-gray-100 flex justify-between items-center">
                 <div class="flex items-center gap-1 text-gray-500 text-xs">
                     <i class="fa-solid fa-location-dot"></i>
                     <span>${car.location}</span>
                 </div>
-                <button class="text-ksaGreen text-sm font-bold hover:underline">التفاصيل</button>
+                <button onclick="openReportModal(${car.id})" class="text-ksaGreen text-sm font-bold hover:underline">
+                    التفاصيل <i class="fa-solid fa-circle-info mr-1"></i>
+                </button>
             </div>
         </div>
     `).join('');
+};
+
+// Mobile Sidebar Toggle Logic
+window.toggleSidebar = function() {
+    const sidebar = document.getElementById('main-sidebar');
+    const overlay = document.getElementById('mobile-overlay');
+    
+    if (sidebar.classList.contains('translate-x-full')) {
+        // OPEN SIDEBAR
+        sidebar.classList.remove('translate-x-full');
+        overlay.classList.remove('hidden');
+        // Small delay to allow display:block to apply before opacity transition
+        setTimeout(() => {
+            overlay.classList.remove('opacity-0');
+        }, 10);
+    } else {
+        // CLOSE SIDEBAR
+        sidebar.classList.add('translate-x-full');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 300);
+    }
+};
+
+// Ensure map resizes correctly when switching tabs on mobile
+const originalSwitchTab = window.switchTab;
+window.switchTab = function(tabName) {
+    originalSwitchTab(tabName);
+    
+    // Invalidate map size after transition to fix grey areas
+    if(tabName === 'tracking' && map) {
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 300);
+    }
 };
